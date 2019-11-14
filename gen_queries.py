@@ -158,7 +158,7 @@ def rollupListMain(version):
 	last = str(int(version) - 1)
 	return "https://bugzilla.mozilla.org/buglist.cgi?query_format=advanced" + \
 	"&f1=OP" + \
-	"&f2=status_whiteboard&o2=substring&v2=adv-main" + version + "%2Br" \
+	"&f2=status_whiteboard&o2=substring&v2=adv-main" + version + "%2Br" + \
 	"&f3=CP"
 
 def rollupListESR(version, primaryVersion):
@@ -169,6 +169,28 @@ def rollupListESR(version, primaryVersion):
 	"&f1=OP" + \
 	"&f2=status_whiteboard&o2=substring&v2=adv-esr" + version + "%2Br" + \
 	"&f3=CP"
+
+def rollupListMainAndESR(primaryVersion, esrVersion):
+	return "https://bugzilla.mozilla.org/rest/bug?" + \
+	"&f1=OP" + \
+	"&f2=status_whiteboard&o2=substring&v2=adv-main" + primaryVersion + "%2Br" + \
+	"&f3=status_whiteboard&o3=substring&v3=adv-esr" + esrVersion + "%2Br" + \
+	"&f4=CP"
+
+
+def rollupListMainOnly(primaryVersion, esrVersion):
+	return "https://bugzilla.mozilla.org/rest/bug?" + \
+	"&f1=OP" + \
+	"&f2=status_whiteboard&o2=substring&v2=adv-main" + primaryVersion + "%2Br" + \
+	"&f3=status_whiteboard&o3=notsubstring&v3=adv-esr" + esrVersion + "%2Br" + \
+	"&f4=CP"
+
+def rollupListESROnly(primaryVersion, esrVersion):
+	return "https://bugzilla.mozilla.org/rest/bug?" + \
+	"&f1=OP" + \
+	"&f2=status_whiteboard&o2=notsubstring&v2=adv-main" + primaryVersion + "%2Br" + \
+	"&f3=status_whiteboard&o3=substring&v3=adv-esr" + esrVersion + "%2Br" + \
+	"&f4=CP"
 
 #------------------------
 def allAdvisories(version, primaryVersion, esr):
