@@ -43,9 +43,9 @@ class Advisory:
 		self.severity = getSeverity(bugJSON)
 		advisory_lines = advisoryText.split("\n")
 		self.cve = bugJSON['alias'] if bugJSON['alias'] else ""
-		self.title = "This is the title" #advisory_lines[0]
-		self.reporter = "Bob Dole" #cleanUpRealName(bugJSON['creator_details']['real_name'])
-		self.description = "\n".join(advisory_lines[1:]).strip() or "Here is a description"
+		self.title = advisory_lines[0]
+		self.reporter = advisory_lines[1] #cleanUpRealName(bugJSON['creator_details']['real_name'])
+		self.description = "\n".join(advisory_lines[2:]).strip()
 	def pprint(self):
 		print(self.id)
 		print("\t", self.severity)
@@ -180,12 +180,13 @@ if __name__ == "__main__":
 			except:
 				pass
 
+		rollupEnd = "reported memory safety bugs present in " + versionTitle + ". Some of these bugs showed evidence of memory corruption and we presume that with enough effort some of these could be exploited to run arbitrary code."
 		print("  CVE-XXX-rollup:")
 		print("    title: Memory safety bugs fixed in", versionTitle)
 		print("    impact:", rollupMaxSeverity)
 		print("    reporter: Mozilla developers and community")
 		print("    description: |")
-		print("      Mozilla developers and community members", ", ".join(rollupReporters))
+		print("      Mozilla developers and community members", ", ".join(rollupReporters), rollupEnd)
 		print("    bugs:")
 		print("      - url:", ", ".join([str(i) for i in rollupIDs]))
 		print("      - desc: Memory safety bugs fixed in", versionTitle)
