@@ -43,8 +43,8 @@ class Advisory:
 		self.severity = getSeverity(bugJSON)
 		advisory_lines = advisoryText.split("\n")
 		self.cve = bugJSON['alias'] if bugJSON['alias'] else ""
-		self.title = advisory_lines[0]
-		self.reporter = advisory_lines[1] #cleanUpRealName(bugJSON['creator_details']['real_name'])
+		self.title = advisory_lines[0].strip()
+		self.reporter = advisory_lines[1].strip() #cleanUpRealName(bugJSON['creator_details']['real_name'])
 		self.description = "\n".join(advisory_lines[2:]).strip()
 	def pprint(self):
 		print(self.id)
@@ -149,8 +149,8 @@ if __name__ == "__main__":
 	print("announced: FIXME")
 	print("impact:", maxSeverity)
 	print("fixed_in:")
-	print("- Firefox", targetVersion)
-	print("title: Security Vulnerabilities fixed in - Firefox", targetVersion)
+	print("- Firefox", "ESR" if args.esr else "", targetVersion)
+	print("title: Security Vulnerabilities fixed in - Firefox", "ESR" if args.esr else "", targetVersion)
 	print("description: |")
 	print("  Do you want a description?")
 
@@ -165,7 +165,7 @@ if __name__ == "__main__":
 		print("    bugs:")
 		print("      - url:", a.id)
 
-	def doRollups(buglist, versionTitle):
+	def doRollups(buglist, versionTitle, priorVersionTitle):
 		if len(buglist) == 0:
 			return
 
@@ -174,13 +174,15 @@ if __name__ == "__main__":
 		rollupMaxSeverity = "low"
 		for b in buglist:
 			rollupIDs.append(b['id'])
-			rollupReporters.add(cleanUpRealName(b['creator_detail']['real_name']))
+			name = cleanUpRealName(b['creator_detail']['real_name'])
+			if name not in ["Treeherder Bug Filer"]:
+				rollupReporters.add(name)
 			try:
 				rollupMaxSeverity = getMaxSeverity(rollupMaxSeverity, getSeverity(b))
 			except:
 				pass
 
-		rollupEnd = "reported memory safety bugs present in " + versionTitle + ". Some of these bugs showed evidence of memory corruption and we presume that with enough effort some of these could be exploited to run arbitrary code."
+		rollupEnd = "reported memory safety bugs present in " + priorVersionTitle + ". Some of these bugs showed evidence of memory corruption and we presume that with enough effort some of these could have been exploited to run arbitrary code."
 		print("  CVE-XXX-rollup:")
 		print("    title: Memory safety bugs fixed in", versionTitle)
 		print("    impact:", rollupMaxSeverity)
@@ -189,16 +191,22 @@ if __name__ == "__main__":
 		print("      Mozilla developers and community members", ", ".join(rollupReporters), rollupEnd)
 		print("    bugs:")
 		print("      - url:", ", ".join([str(i) for i in rollupIDs]))
-		print("      - desc: Memory safety bugs fixed in", versionTitle)
+		print("        desc: Memory safety bugs fixed in", versionTitle)
 
 	# Rollup Bug for Main + ESR. Always do this one.
 	url = rollupListMainAndESR(mainVersion, esrVersion) + "&api_key=" + APIKEY
-	doRollups(doBugRequest(url), "Firefox " + mainVersion + " and Firefox ESR " + esrVersion)
+	doRollups(doBugRequest(url),
+		"Firefox " + mainVersion + " and Firefox ESR " + esrVersion,
+		"Firefox " + str(int(mainVersion)-1) + " and Firefox ESR " + str(float(esrVersion)-.1))
 	if not args.esr:
 	# Rollup Bug for Main Only 
 		url = rollupListMainOnly(mainVersion, esrVersion) + "&api_key=" + APIKEY
-		doRollups(doBugRequest(url), "Firefox " + mainVersion)
+		doRollups(doBugRequest(url), 
+			"Firefox " + mainVersion,
+			"Firefox " + str(int(mainVersion)-1))
 	else:
 	# Rollup bug for ESR only
 		url = rollupListESROnly(mainVersion, esrVersion) + "&api_key=" + APIKEY
-		doRollups(doBugRequest(url), "Firefox ESR " + esrVersion)
+		doRollups(doBugRequest(url),
+			"Firefox ESR " + esrVersion,
+			"Firefox ESR " + str(float(esrVersion) - .1))
