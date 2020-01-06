@@ -30,9 +30,11 @@ def getSeverity(bugJSON):
 	severity = None
 	for k in bugJSON['keywords']:
 		if k in ["sec-critical", "sec-high", "sec-moderate", "sec-low"]:
+			thisSev = k.replace("sec-", "")
 			if severity is not None:
-				raise Exception(str(bugJSON['id']) + " has two sec keywords set")
-			severity = k.replace("sec-", "")
+				severity = getMaxSeverity(severity, thisSev)
+			else:
+				severity = thisSev
 	if severity is None:
 		raise Exception(str(bugJSON['id']) + " is missing a sec keyword")
 	return severity
@@ -149,8 +151,8 @@ if __name__ == "__main__":
 	print("announced: FIXME")
 	print("impact:", maxSeverity)
 	print("fixed_in:")
-	print("- Firefox", "ESR" if args.esr else "", targetVersion)
-	print("title: Security Vulnerabilities fixed in - Firefox", "ESR" if args.esr else "", targetVersion)
+	print("- Firefox " + ("ESR" if args.esr else "") + targetVersion)
+	print("title: Security Vulnerabilities fixed in Firefox " + ("ESR" if args.esr else "") + targetVersion)
 	print("description: |")
 	print("  Do you want a description?")
 
