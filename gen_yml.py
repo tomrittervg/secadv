@@ -148,7 +148,7 @@ if __name__ == "__main__":
 		maxSeverity = getMaxSeverity(maxSeverity, a.severity)
 
 	print("## mfsa" + str(datetime.date.today().year) + "-FIXME.yml")
-	print("announced: FIXME")
+	print("announced: FIXME <Month> <Day of Month>, <Year>")
 	print("impact:", maxSeverity)
 	print("fixed_in:")
 	print("- Firefox " + ("ESR" if args.esr else "") + targetVersion)
