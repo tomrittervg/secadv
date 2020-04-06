@@ -63,8 +63,8 @@ if __name__ == "__main__":
 	print("announced: FIXME <Month> <Day of Month>, <Year>")
 	print("impact:", maxSeverity)
 	print("fixed_in:")
-	print("- Firefox " + ("ESR" if args.esr else "") + targetVersion)
-	print("title: Security Vulnerabilities fixed in Firefox " + ("ESR" if args.esr else "") + targetVersion)
+	print("- Firefox " + ("ESR " if args.esr else "") + targetVersion)
+	print("title: Security Vulnerabilities fixed in Firefox " + ("ESR " if args.esr else "") + targetVersion)
 	print("description: |")
 	print("  Do you want a description?")
 
