@@ -102,7 +102,7 @@ if __name__ == "__main__":
 		print("    impact:", rollupMaxSeverity)
 		print("    reporter: Mozilla developers and community")
 		print("    description: |")
-		print("      Mozilla developers and community members", ", ".join(rollupReporters), rollupEnd)
+		print("      Mozilla developers and community members", ", ".join(rollupReporters).encode("utf-8"), rollupEnd)
 		print("    bugs:")
 		print("      - url:", ", ".join([str(i) for i in rollupIDs]))
 		print("        desc: Memory safety bugs fixed in", versionTitle)
