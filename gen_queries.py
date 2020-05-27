@@ -32,7 +32,7 @@ def sanityCheck():
 	]
 	for e in expected:
 		if versionToESRs(e[0]) != e[1]:
-			print "Sanity Check: Did not match versionToESRs(" + str(e[0]) + ") ==", e[1], "Got", versionToESRs(e[0])
+			print(("Sanity Check: Did not match versionToESRs(" + str(e[0]) + ") ==", e[1], "Got", versionToESRs(e[0])))
 			sys.exit(1)
 
 #------------------------
@@ -269,38 +269,38 @@ if __name__ == "__main__":
 	sanityCheck()
 	primaryVersion = int(args.version)
 	versions = [primaryVersion] + versionToESRs(primaryVersion)
-	print "Calculating versions", versions
+	print(("Calculating versions", versions))
 	
 
 	for i in range(len(versions)):
 		version = versions[i]
-		print "------------------------------------------------------------"
-		print "Version:", version
-		print ""
+		print("------------------------------------------------------------")
+		print("Version:", version)
+		print("")
 
-		print "Whiteboard tags to assign:"
-		print toAssign(version, primaryVersion, i != 0)
-		print ""
+		print("Whiteboard tags to assign:")
+		print(toAssign(version, primaryVersion, i != 0))
+		print("")
 
-		print "Advisories to write:"
-		print toWrite(version, primaryVersion, i != 0)
-		print ""
+		print("Advisories to write:")
+		print(toWrite(version, primaryVersion, i != 0))
+		print("")
 
-		print "Roll-up list:"
-		print rollupList(version, primaryVersion, i != 0)
-		print ""
+		print("Roll-up list:")
+		print(rollupList(version, primaryVersion, i != 0))
+		print("")
 
 		if not args.verbose:
 			continue
 
-		print "All tagged advisories:"
-		print allAdvisories(version, primaryVersion, i != 0)
-		print ""
+		print("All tagged advisories:")
+		print(allAdvisories(version, primaryVersion, i != 0))
+		print("")
 
-		print "Non-rollup advisories:"
-		print nonRollupList(version, primaryVersion, i != 0)
-		print ""
+		print("Non-rollup advisories:")
+		print(nonRollupList(version, primaryVersion, i != 0))
+		print("")
 
-		print "Advisories considered and rejected:"
-		print rejected(version, primaryVersion, i != 0)
-		print ""
+		print("Advisories considered and rejected:")
+		print(rejected(version, primaryVersion, i != 0))
+		print("")
