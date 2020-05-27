@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
+
 
 import re
 import sys
@@ -111,7 +111,7 @@ def sanityCheckBugs(bugs, require_cves=False):
 		# Check for severity keywords
 		try:
 			getSeverity(b)
-		except Exception, e:
+		except Exception as e:
 			eprint(bugid, "seems to have some problem with the severity. If you can resolve it, please do, otherwise contact Tom Ritter (and/or Dan Veditz)")
 			eprint("Exception:")
 			eprint(e)
@@ -125,7 +125,7 @@ def sanityCheckBugs(bugs, require_cves=False):
 		# Check if the bug has an advisory
 		try:
 			getAdvisoryAttachment(bugid)
-		except Exception, e:
+		except Exception as e:
 			eprint(bugid, "might be missing an advisory attachment. Please create an attachment named advisory.txt as described here: https://wiki.mozilla.org/Security/Firefox/Security_Bug_Life_Cycle/Security_Advisories#Write_the_advisories")
 			eprint("Exception:")
 			eprint(e)
