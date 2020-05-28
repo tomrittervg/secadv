@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
+
 
 import re
 import sys
@@ -60,7 +60,8 @@ if __name__ == "__main__":
     for b in bugs:
         if b['id'] in [1441468, 1587976]:
             continue
-        advisories.append(Advisory(b, getAdvisoryAttachment(b['id'])))
+        advisoryTxt = getAdvisoryAttachment(b['id']).decode("utf-8")
+        advisories.append(Advisory(b, advisoryTxt))
 
     maxSeverity = "low"
     for a in advisories:
@@ -105,7 +106,6 @@ if __name__ == "__main__":
                     rollupMaxSeverity, getSeverity(b))
             except:
                 pass
-
         rollupEnd = "reported memory safety bugs present in " + priorVersionTitle + \
             ". Some of these bugs showed evidence of memory corruption and we presume that with enough effort some of these could have been exploited to run arbitrary code."
         print("  CVE-XXX-rollup:")
@@ -114,7 +114,7 @@ if __name__ == "__main__":
         print("    reporter: Mozilla developers and community")
         print("    description: |")
         print("      Mozilla developers and community members",
-              ", ".join(rollupReporters).encode("utf-8"), rollupEnd)
+              ", ".join(rollupReporters), rollupEnd)
         print("    bugs:")
         print("      - url:", ", ".join([str(i) for i in rollupIDs]))
         print("        desc: Memory safety bugs fixed in", versionTitle)
