@@ -3,32 +3,59 @@
 import sys
 import argparse
 
+"""
+To update this function when we reach a new ESR, just add the new ESR version at the end of knownESRs.
+Then add some new expected values to the expected variable in sanityCheck to make sure it works as expected.
+Hopefully no code update is needed.
+
+You may wonder why we have the versions as strings as the reurn from this function.
+It's because 68.10 is mathematically equal to 68.1 but they are different versions.
+"""
 def versionToESRs(version):
-	if ((version - 68) % 8) == 0 or ((version - 68) % 8) == 1:
-		# We're in the overlap range
-		lastESRBase = version - 8 - ((version - 68) % 8)
-		if ((version - 68) % 8) == 0:
-			# This is the first release in the overlap, so only one ESR version, the old one
-			return [lastESRBase + .8]
-		else:
-			# Second release in the overlap: two ESR versions
-			return [lastESRBase + .9, (version - 1) + .1]
+	version = int(version)
+
+	knownESRs = [60, 68, 78]
+	twoESRVersions = []
+	for x in knownESRs:
+		twoESRVersions.append(x)
+		twoESRVersions.append(x+1)
+		# We have a three-release overlap post-78 due to shortened release cycles
+		if x >= 78:
+			twoESRVersions.append(x+2)
+
+	twoESRs = True if version in twoESRVersions else False
+	subsetOfESRs = [x for x in knownESRs if x <= version]
+
+	if twoESRs:
+		firstESRPointRelease = str(subsetOfESRs[-2]) + "." + str(version - subsetOfESRs[-2])
+		secondESRPointRelease = str(subsetOfESRs[-1]) + "." + str(version - subsetOfESRs[-1])
+		return [firstESRPointRelease, secondESRPointRelease]
 	else:
-		pointRelease = float((version - 68) % 8)
-		return [(version - pointRelease) + (pointRelease / 10)]
+		pointRelease = str(subsetOfESRs[-1]) + "." + str(version - subsetOfESRs[-1])
+		return [pointRelease]
+
+def getPriorVersion(version):
+	if "." in version:
+		return version.split(".")[0] + str(int(version.split(".")[1])-1)
+	else:
+		return str(int(version) - 1)
 
 def sanityCheck():
 	expected = [
-		(68, [60.8]),
-		(69, [60.9, 68.1]),
-		(70, [68.2]),
-		(71, [68.3]),
-		(72, [68.4]),
-		(73, [68.5]),
-		(74, [68.6]),
-		(75, [68.7]),
-		(76, [68.8]),
-		(77, [68.9, 76.1])
+		(68, ["60.8", "68.0"]),
+		(69, ["60.9", "68.1"]),
+		(70, ["68.2"]),
+		(71, ["68.3"]),
+		(72, ["68.4"]),
+		(73, ["68.5"]),
+		(74, ["68.6"]),
+		(75, ["68.7"]),
+		(76, ["68.8"]),
+		(77, ["68.9"]),
+		(78, ["68.10", "78.0"]),
+		(79, ["68.11", "78.1"]),
+		(80, ["68.12", "78.2"]),
+		(81, ["78.3"])
 	]
 	for e in expected:
 		if versionToESRs(e[0]) != e[1]:
@@ -42,8 +69,7 @@ def toAssign(version, primaryVersion, esr):
 	else:
 		return toAssignMain(version)
 def toAssignMain(version):
-	version = str(version)
-	last = str(int(version) - 1)
+	prior = getPriorVersion(version)
 	return "https://bugzilla.mozilla.org/buglist.cgi?query_format=advanced" + \
 	\
 	"&classification=Client%20Software" + \
@@ -54,7 +80,7 @@ def toAssignMain(version):
 	"&keywords=sec-%28.%2B%29&keywords_type=regexp" + \
 	\
 	"&f1=OP" + \
-	"&f2=cf_status_firefox" + last + "&o2=nowordssubstr&v2=fixed%20verified%20unaffected%20disabled" + \
+	"&f2=cf_status_firefox" + prior + "&o2=nowordssubstr&v2=fixed%20verified%20unaffected%20disabled" + \
 	"&f3=CP" + \
 	\
 	"&f4=OP&j4=OR" + \
@@ -65,10 +91,8 @@ def toAssignMain(version):
 	"&f8=OP" + \
 	"&f9=status_whiteboard&o9=notsubstring&v9=adv-main" + version + \
 	"&f10=CP"
-def toAssignESR(version, primaryVersion):
-	esrVersion = str(int(version))
-	version = str(version)
-	primaryVersion = str(primaryVersion)
+def toAssignESR(esrVersion, primaryVersion):
+	esrBaseVersion = str(int(float(esrVersion)))
 	return "https://bugzilla.mozilla.org/buglist.cgi?query_format=advanced" + \
 	\
 	"&classification=Client%20Software" + \
@@ -79,11 +103,11 @@ def toAssignESR(version, primaryVersion):
 	"&keywords=sec-%28.%2B%29&keywords_type=regexp" + \
 	\
 	"&f1=OP&j1=OR" + \
-	"&f2=cf_tracking_firefox_esr" + esrVersion + "&o2=equals&v2=" + primaryVersion + "%2B" + \
+	"&f2=cf_tracking_firefox_esr" + esrBaseVersion + "&o2=equals&v2=" + primaryVersion + "%2B" + \
 	"&f3=CP" + \
 	\
 	"&f4=OP" + \
-	"&f5=status_whiteboard&o5=notsubstring&v5=adv-esr" + version + \
+	"&f5=status_whiteboard&o5=notsubstring&v5=adv-esr" + esrVersion + \
 	"&f6=CP"
 
 #------------------------	
@@ -93,8 +117,7 @@ def toWrite(version, primaryVersion, esr):
 	else:
 		return toWriteMain(version)
 def toWriteMain(version):
-	version = str(version)
-	last = str(int(version) - 1)
+	prior = getPriorVersion(version)
 	return "https://bugzilla.mozilla.org/buglist.cgi?query_format=advanced" + \
 	\
 	"&classification=Client%20Software" + \
@@ -105,7 +128,7 @@ def toWriteMain(version):
 	"&keywords=sec-%28.%2B%29&keywords_type=regexp" + \
 	\
 	"&f1=OP" + \
-	"&f2=cf_status_firefox" + last + "&o2=nowordssubstr&v2=fixed%20verified%20unaffected%20disabled" + \
+	"&f2=cf_status_firefox" + prior + "&o2=nowordssubstr&v2=fixed%20verified%20unaffected%20disabled" + \
 	"&f3=CP" + \
 	\
 	"&f4=OP&j4=OR" + \
@@ -121,10 +144,8 @@ def toWriteMain(version):
 	"&f12=OP" + \
 	"&f13=attachments.description&o13=equals&v13=advisory.txt&n13=1" + \
 	"&f14=CP"
-def toWriteESR(version, primaryVersion):
-	esrVersion = str(int(version))
-	version = str(version)
-	primaryVersion = str(primaryVersion)
+def toWriteESR(esrVersion, primaryVersion):
+	esrBaseVersion = str(int(float(esrVersion)))
 	return "https://bugzilla.mozilla.org/buglist.cgi?query_format=advanced" + \
 	\
 	"&classification=Client%20Software" + \
@@ -135,12 +156,12 @@ def toWriteESR(version, primaryVersion):
 	"&keywords=sec-%28.%2B%29&keywords_type=regexp" + \
 	\
 	"&f1=OP" + \
-	"&f2=cf_tracking_firefox_esr" + esrVersion + "&o2=equals&v2=" + primaryVersion + "%2B" + \
+	"&f2=cf_tracking_firefox_esr" + esrBaseVersion + "&o2=equals&v2=" + primaryVersion + "%2B" + \
 	"&f3=CP" + \
 	\
 	"&f4=OP" + \
-	"&f5=status_whiteboard&o5=substring&v5=adv-esr" + version + "%2B" + \
-	"&f6=status_whiteboard&o6=notsubstring&v6=adv-esr" + version + "%2Br" + \
+	"&f5=status_whiteboard&o5=substring&v5=adv-esr" + esrVersion + "%2B" + \
+	"&f6=status_whiteboard&o6=notsubstring&v6=adv-esr" + esrVersion + "%2Br" + \
 	"&f7=CP" + \
 	\
 	"&f8=OP" + \
@@ -154,20 +175,15 @@ def rollupList(version, primaryVersion, esr):
 	else:
 		return rollupListMain(version)
 def rollupListMain(version):
-	version = str(version)
-	last = str(int(version) - 1)
 	return "https://bugzilla.mozilla.org/buglist.cgi?query_format=advanced" + \
 	"&f1=OP" + \
 	"&f2=status_whiteboard&o2=substring&v2=adv-main" + version + "%2Br" + \
 	"&f3=CP"
 
-def rollupListESR(version, primaryVersion):
-	esrVersion = str(int(version))
-	version = str(version)
-	primaryVersion = str(primaryVersion)
+def rollupListESR(esrVersion, primaryVersion):
 	return "https://bugzilla.mozilla.org/buglist.cgi?query_format=advanced" + \
 	"&f1=OP" + \
-	"&f2=status_whiteboard&o2=substring&v2=adv-esr" + version + "%2Br" + \
+	"&f2=status_whiteboard&o2=substring&v2=adv-esr" + esrVersion + "%2Br" + \
 	"&f3=CP"
 
 def rollupListMainAndESR(primaryVersion, esrVersion):
@@ -199,19 +215,14 @@ def allAdvisories(version, primaryVersion, esr):
 	else:
 		return allAdvisoriesMain(version)
 def allAdvisoriesMain(version):
-	version = str(version)
-	last = str(int(version) - 1)
 	return "https://bugzilla.mozilla.org/buglist.cgi?query_format=advanced" + \
 	"&f1=OP" + \
 	"&f2=status_whiteboard&o2=substring&v2=adv-main" + version + "%2B" \
 	"&f3=CP"
-def allAdvisoriesESR(version, primaryVersion):
-	esrVersion = str(int(version))
-	version = str(version)
-	primaryVersion = str(primaryVersion)
+def allAdvisoriesESR(esrVersion, primaryVersion):
 	return "https://bugzilla.mozilla.org/buglist.cgi?query_format=advanced" + \
 	"&f1=OP" + \
-	"&f2=status_whiteboard&o2=substring&v2=adv-esr" + version + "%2B" + \
+	"&f2=status_whiteboard&o2=substring&v2=adv-esr" + esrVersion + "%2B" + \
 	"&f3=CP"
 
 #------------------------
@@ -221,21 +232,16 @@ def nonRollupList(version, primaryVersion, esr):
 	else:
 		return nonRollupListMain(version)
 def nonRollupListMain(version):
-	version = str(version)
-	last = str(int(version) - 1)
 	return "https://bugzilla.mozilla.org/buglist.cgi?query_format=advanced" + \
 	"&f1=OP" + \
 	"&f2=status_whiteboard&o2=substring&v2=adv-main" + version + "%2B" \
 	"&f3=status_whiteboard&o3=notsubstring&v3=adv-main" + version + "%2Br" + \
 	"&f4=CP"
-def nonRollupListESR(version, primaryVersion):
-	esrVersion = str(int(version))
-	version = str(version)
-	primaryVersion = str(primaryVersion)
+def nonRollupListESR(esrVersion, primaryVersion):
 	return "https://bugzilla.mozilla.org/buglist.cgi?query_format=advanced" + \
 	"&f1=OP" + \
-	"&f2=status_whiteboard&o2=substring&v2=adv-esr" + version + "%2B" + \
-	"&f3=status_whiteboard&o3=notsubstring&v3=adv-esr" + version + "%2Br" + \
+	"&f2=status_whiteboard&o2=substring&v2=adv-esr" + esrVersion + "%2B" + \
+	"&f3=status_whiteboard&o3=notsubstring&v3=adv-esr" + esrVersion + "%2Br" + \
 	"&f4=CP"
 
 #------------------------
@@ -245,19 +251,14 @@ def rejected(version, primaryVersion, esr):
 	else:
 		return rejectedMain(version)
 def rejectedMain(version):
-	version = str(version)
-	last = str(int(version) - 1)
 	return "https://bugzilla.mozilla.org/buglist.cgi?query_format=advanced" + \
 	"&f1=OP" + \
 	"&f2=status_whiteboard&o2=substring&v2=adv-main" + version + "-" \
 	"&f3=CP"
-def rejectedESR(version, primaryVersion):
-	esrVersion = str(int(version))
-	version = str(version)
-	primaryVersion = str(primaryVersion)
+def rejectedESR(esrVersion, primaryVersion):
 	return "https://bugzilla.mozilla.org/buglist.cgi?query_format=advanced" + \
 	"&f1=OP" + \
-	"&f2=status_whiteboard&o2=substring&v2=adv-esr" + version + "-" + \
+	"&f2=status_whiteboard&o2=substring&v2=adv-esr" + esrVersion + "-" + \
 	"&f3=CP"
 
 if __name__ == "__main__":
@@ -267,7 +268,7 @@ if __name__ == "__main__":
 	args = parser.parse_args(sys.argv[1:])
 
 	sanityCheck()
-	primaryVersion = int(args.version)
+	primaryVersion = args.version
 	versions = [primaryVersion] + versionToESRs(primaryVersion)
 	print "Calculating versions", versions
 	
