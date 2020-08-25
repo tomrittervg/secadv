@@ -28,7 +28,7 @@ def getBugs(esr, version):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Generate a security release .yml')
     parser.add_argument('--verbose', '-v', action='store_true', help='print(out debugging info')
-    parser.add_argument('--esr', action='store_true', help='Generate the ESR document for the given full version')
+    parser.add_argument('--esr', action='count', default=0, help='Generate the ESR document for the given full version. Specify twice to generate for the second ESR version of a release.')
     parser.add_argument('version', help='Version to generate queries for. Do not give an ESR version; give the normal version and specify --esr')
     args = parser.parse_args(sys.argv[1:])
     if not APIKEY:
@@ -40,9 +40,11 @@ if __name__ == "__main__":
 
     mainVersion = args.version
     esrVersion = versionToESRs(float(args.version))
-    if len(esrVersion) != 1:
-        raise Exception("This script isn't set up to handle two ESR versions in flight at once. Development needed.")
-    esrVersion = str(esrVersion[0])
+    if len(esrVersion) > 1:
+        if args.esr <= len(esrVersion):
+            esrVersion = str(esrVersion[args.esr - 1])
+        else:
+            eprint("--esr was specified more times than we have ESR versions to generate")
     targetVersion = esrVersion if args.esr else mainVersion
     eprint("Generating advisories for Version", targetVersion, ("(which is an ESR release)" if args.esr else ""))
 

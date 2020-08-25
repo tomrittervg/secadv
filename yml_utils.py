@@ -13,7 +13,7 @@ class Advisory:
     def __init__(self, bugJSON, advisoryText):
         self.id = bugJSON['id']
         self.severity = getSeverity(bugJSON)
-        advisory_lines = advisoryText.split("\n")
+        advisory_lines = advisoryText.decode("utf-8").split("\n")
         self.cve = bugJSON['alias'] if bugJSON['alias'] else ""
         self.title = advisory_lines[0].strip()
         self.reporter = advisory_lines[1].strip() #cleanUpRealName(bugJSON['creator_details']['real_name'])
