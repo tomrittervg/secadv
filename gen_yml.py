@@ -14,16 +14,12 @@ try:
 except:
     APIKEY = None
 
-from gen_queries import versionToESRs, rollupListMainAndESR, rollupListMainOnly, rollupListESROnly
+from gen_queries import versionToESRs, nonRollupList, rollupListMainAndESR, rollupListMainOnly, rollupListESROnly
 from yml_utils import *
 
-def getBugs(esr, version):
-    nonRollUpLink = "https://bugzilla.mozilla.org/rest/bug?api_key=" + APIKEY + \
-    "&f1=OP" + \
-    "&f2=status_whiteboard&o2=substring&v2=adv-" + ("esr" if esr else "main") + version + "%2B" \
-    "&f3=status_whiteboard&o3=notsubstring&v3=adv-" + ("esr" if esr else "main") + version + "%2Br" + \
-    "&f4=CP"
-    return doBugRequest(nonRollUpLink)
+def getBugs(targetVersion, mainVersion, esr):
+    url = nonRollupList(targetVersion, mainVersion, esr).replace("buglist.cgi", "rest/bug") + "&api_key=" + APIKEY
+    return doBugRequest(url)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Generate a security release .yml')
@@ -45,16 +41,36 @@ if __name__ == "__main__":
             esrVersion = str(esrVersion[args.esr - 1])
         else:
             eprint("--esr was specified more times than we have ESR versions to generate")
+    else:
+        esrVersion = esrVersion[0]
     targetVersion = esrVersion if args.esr else mainVersion
     eprint("Generating advisories for Version", targetVersion, ("(which is an ESR release)" if args.esr else ""))
 
+    # Figure out the rollup situation
+    url = rollupListMainAndESR(mainVersion, esrVersion) + "&api_key=" + APIKEY
+    shared_rollups = doBugRequest(url)
+    if not args.esr:
+        url = rollupListMainOnly(mainVersion, esrVersion) + "&api_key=" + APIKEY
+    else:
+        url = rollupListESROnly(mainVersion, esrVersion) + "&api_key=" + APIKEY
+    version_specific_rollups = doBugRequest(url)
+
     # Non-rollup bugs
-    bugs = getBugs(args.esr, targetVersion)
+    bugs = getBugs(targetVersion, mainVersion, args.esr)
     advisories = []
     for b in bugs:
         if b['id'] in [1441468, 1587976]:
             continue
         advisories.append(Advisory(b, getAdvisoryAttachment(b['id'])))
+
+    if len(shared_rollups) == 1:
+        b = shared_rollups[0]
+        advisories.append(Advisory(b, getAdvisoryAttachment(b['id'])))
+        shared_rollups = []
+    if len(version_specific_rollups) == 1:
+        b = version_specific_rollups[0]
+        advisories.append(Advisory(b, getAdvisoryAttachment(b['id'])))
+        version_specific_rollups = []
 
     maxSeverity = "low"
     for a in advisories:
@@ -85,6 +101,9 @@ if __name__ == "__main__":
         if len(buglist) == 0:
             return
 
+        if len(buglist) == 1:
+            raise Exception("We shouldn't be here for a single bug.")
+
         rollupIDs = []
         rollupReporters = set()
         rollupMaxSeverity = "low"
@@ -110,19 +129,16 @@ if __name__ == "__main__":
         print("        desc: Memory safety bugs fixed in", versionTitle)
 
     # Rollup Bug for Main + ESR. Always do this one.
-    url = rollupListMainAndESR(mainVersion, esrVersion) + "&api_key=" + APIKEY
-    doRollups(doBugRequest(url),
+    doRollups(shared_rollups,
         "Firefox " + mainVersion + " and Firefox ESR " + esrVersion,
         "Firefox " + str(int(mainVersion)-1) + " and Firefox ESR " + str(float(esrVersion)-.1))
     if not args.esr:
     # Rollup Bug for Main Only 
-        url = rollupListMainOnly(mainVersion, esrVersion) + "&api_key=" + APIKEY
-        doRollups(doBugRequest(url), 
+        doRollups(version_specific_rollups,
             "Firefox " + mainVersion,
             "Firefox " + str(int(mainVersion)-1))
     else:
     # Rollup bug for ESR only
-        url = rollupListESROnly(mainVersion, esrVersion) + "&api_key=" + APIKEY
         doRollups(doBugRequest(url),
             "Firefox ESR " + esrVersion,
             "Firefox ESR " + str(float(esrVersion) - .1))
