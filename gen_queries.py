@@ -62,6 +62,10 @@ def sanityCheck():
             print("Sanity Check: Did not match versionToESRs(" + str(e[0]) + ") ==", e[1], "Got", versionToESRs(e[0]))
             sys.exit(1)
 
+
+
+
+
 #------------------------
 def toAssign(version, primaryVersion, esr):
     if esr:
@@ -77,8 +81,6 @@ def toAssignMain(version):
     "&classification=Components" + \
     "&classification=Other" + \
     \
-    "&keywords=sec-%28.%2B%29&keywords_type=regexp" + \
-    \
     "&f1=OP" + \
     "&f2=cf_status_firefox" + prior + "&o2=nowordssubstr&v2=fixed%20verified%20unaffected%20disabled" + \
     "&f3=CP" + \
@@ -90,7 +92,13 @@ def toAssignMain(version):
     \
     "&f8=OP" + \
     "&f9=status_whiteboard&o9=notsubstring&v9=adv-main" + version + \
-    "&f10=CP"
+    "&f10=CP" + \
+    \
+    "&f11=OP&j11=OR" + \
+    "&f12=keywords&o12=regexp&v12=sec-%28.%2B%29" + \
+    "&f13=bug_group&o13=substring&v13=%20core-security%20" + \
+    "&f14=CP"
+
 def toAssignESR(esrVersion, primaryVersion):
     esrBaseVersion = str(int(float(esrVersion)))
     return "https://bugzilla.mozilla.org/buglist.cgi?query_format=advanced" + \
@@ -100,15 +108,19 @@ def toAssignESR(esrVersion, primaryVersion):
     "&classification=Components" + \
     "&classification=Other" + \
     \
-    "&keywords=sec-%28.%2B%29&keywords_type=regexp" + \
-    \
     "&f1=OP&j1=OR" + \
     "&f2=cf_tracking_firefox_esr" + esrBaseVersion + "&o2=equals&v2=" + primaryVersion + "%2B" + \
     "&f3=CP" + \
     \
     "&f4=OP" + \
     "&f5=status_whiteboard&o5=notsubstring&v5=adv-esr" + esrVersion + \
-    "&f6=CP"
+    "&f6=CP" + \
+    \
+    "&f7=OP&j7=OR" + \
+    "&f8=keywords&o8=regexp&v8=sec-%28.%2B%29" + \
+    "&f9=bug_group&o9=substring&v9=%20core-security%20" + \
+    "&f10=CP"
+
 
 #------------------------    
 def toWrite(version, primaryVersion, esr):
@@ -124,8 +136,6 @@ def toWriteMain(version):
     "&classification=Developer%20Infrastructure" + \
     "&classification=Components" + \
     "&classification=Other" + \
-    \
-    "&keywords=sec-%28.%2B%29&keywords_type=regexp" + \
     \
     "&f1=OP" + \
     "&f2=cf_status_firefox" + prior + "&o2=nowordssubstr&v2=fixed%20verified%20unaffected%20disabled" + \
@@ -143,7 +153,13 @@ def toWriteMain(version):
     \
     "&f12=OP" + \
     "&f13=attachments.description&o13=equals&v13=advisory.txt&n13=1" + \
-    "&f14=CP"
+    "&f14=CP" + \
+    \
+    "&f15=OP&j15=OR" + \
+    "&f16=keywords&o16=regexp&v16=sec-%28.%2B%29" + \
+    "&f17=bug_group&o17=substring&v17=%20core-security%20" + \
+    "&f18=CP"
+
 def toWriteESR(esrVersion, primaryVersion):
     esrBaseVersion = str(int(float(esrVersion)))
     return "https://bugzilla.mozilla.org/buglist.cgi?query_format=advanced" + \
@@ -166,7 +182,13 @@ def toWriteESR(esrVersion, primaryVersion):
     \
     "&f8=OP" + \
     "&f9=attachments.description&o9=equals&v9=advisory.txt&n9=1" + \
-    "&f10=CP"
+    "&f10=CP" + \
+    \
+    "&f11=OP&j11=OR" + \
+    "&f12=keywords&o12=regexp&v12=sec-%28.%2B%29" + \
+    "&f13=bug_group&o13=substring&v13=%20core-security%20" + \
+    "&f14=CP"
+
 
 #------------------------
 def rollupList(version, primaryVersion, esr):
