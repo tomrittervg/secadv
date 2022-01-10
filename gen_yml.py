@@ -119,7 +119,9 @@ if __name__ == "__main__":
         for b in buglist:
             rollupIDs.append(b['id'])
             name = cleanUpRealName(b['creator_detail']['real_name'])
-            if name not in ["Treeherder Bug Filer"]:
+            if name in ["Christian Holler", "Jason Kratzer", "Tyson Smith", "Jesse Schwartzentruber"]:
+                rollupReporters.add("the Mozilla Fuzzing Team")
+            elif name not in ["Treeherder Bug Filer"]:
                 rollupReporters.add(name)
             try:
                 rollupMaxSeverity = getMaxSeverity(rollupMaxSeverity, getSeverity(b))
