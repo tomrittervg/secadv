@@ -25,6 +25,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Generate a security release .yml')
     parser.add_argument('--verbose', '-v', action='store_true', help='print(out debugging info')
     parser.add_argument('--esr', action='count', default=0, help='Generate the ESR document for the given full version. Specify twice to generate for the second ESR version of a release.')
+    parser.add_argument('--exclude', action='append', help='Bug IDs to exclude from checks about attachments')
     parser.add_argument('version', help='Version to generate queries for. Do not give an ESR version; give the normal version and specify --esr')
     args = parser.parse_args(sys.argv[1:])
     if not APIKEY:
@@ -59,18 +60,26 @@ if __name__ == "__main__":
     bugs = getBugs(targetVersion, mainVersion, args.esr)
     advisories = []
     for b in bugs:
-        if b['id'] in [1441468, 1587976]:
+        if b['id'] in [1441468, 1587976] or (args.exclude is not None and str(b['id']) in args.exclude):
             continue
         advisories.append(Advisory(b, getAdvisoryAttachment(b['id'])))
 
     if len(shared_rollups) == 1:
         b = shared_rollups[0]
-        advisories.append(Advisory(b, getAdvisoryAttachment(b['id'])))
-        shared_rollups = []
+        if (args.exclude is None or str(b['id']) not in args.exclude):
+            try:
+                advisories.append(Advisory(b, getAdvisoryAttachment(b['id'])))
+            except:
+                raise Exception("Could not find an advisory for %s which is the only bug in the shared rollup." % b['id'])
+            shared_rollups = []
     if len(version_specific_rollups) == 1:
         b = version_specific_rollups[0]
-        advisories.append(Advisory(b, getAdvisoryAttachment(b['id'])))
-        version_specific_rollups = []
+        if (args.exclude is None or str(b['id']) not in args.exclude):
+            try:
+                advisories.append(Advisory(b, getAdvisoryAttachment(b['id'])))
+            except:
+                raise Exception("Could not find an advisory for %s which is the only bug in the version-specific rollup." % b['id'])
+            version_specific_rollups = []
 
     maxSeverity = "low"
     for a in advisories:

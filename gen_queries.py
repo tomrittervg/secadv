@@ -14,7 +14,7 @@ It's because 68.10 is mathematically equal to 68.1 but they are different versio
 def versionToESRs(version):
     version = int(version)
 
-    knownESRs = [60, 68, 78]
+    knownESRs = [60, 68, 78, 91]
     twoESRVersions = []
     for x in knownESRs:
         twoESRVersions.append(x)
