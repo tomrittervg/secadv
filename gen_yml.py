@@ -150,6 +150,6 @@ if __name__ == "__main__":
             "Firefox " + str(int(mainVersion)-1))
     else:
     # Rollup bug for ESR only
-        doRollups(doBugRequest(url),
+        doRollups(version_specific_rollups,
             "Firefox ESR " + esrVersion,
             "Firefox ESR " + str(float(esrVersion) - .1))
