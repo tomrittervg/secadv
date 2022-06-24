@@ -1,0 +1,72 @@
+// This script can be put into a script.google.com app script and run to assign CVEs to bugs.
+// First fill in the new CVEs you've retrieved from MITRE [0]
+// Then fill in the bug IDs you need to assign the CVEs to [1]
+// Then run the script - it will look for rows that have a bugid and cve but no title, then 
+//    set the title in the spreadsheet and update the bug with the cve alias.
+
+// [0] Protip: if you copy the first CVE into the spreadsheet you can use the corner-of-the-cell
+//             dragdown technique to autopopulate the following rows. Just drag down to the
+//             appropriate cve you've reserved.
+// [1] Protip: if you run ./gen_queries.py -v NNN you'll get the 'Non-rollup advisories' link.
+//             export that as CSV then copy the first column in the CVE spreadsheet
+
+var API_KEY = "";
+
+var Query = function(api_key, url) {
+  this.api_key = api_key;
+  this.url = url;
+  
+  this.get = function() {
+    var response = UrlFetchApp.fetch(this.url + "&api_key=" + this.api_key);
+    var data = JSON.parse(response);
+    var bugs = data["bugs"];
+    return bugs;
+  }
+};
+
+var UpdateQuery = function(api_key, bugid, cve) {
+  var payload = {
+    'alias': cve 
+  };
+  var options = {
+    "method": "put",
+    "contentType" : "application/json",
+    "payload": JSON.stringify(payload),
+  }
+  var response = UrlFetchApp.fetch("https://bugzilla.mozilla.org/rest/bug/" + bugid + "?api_key=" + api_key, options);
+  var data = JSON.parse(response);
+  Logger.log(data);
+};
+
+function assignCVEs() {
+    cve_spreadsheet = SpreadsheetApp.openByUrl("https://docs.google.com/spreadsheets/d/14rI7jdL23HHJ5VOpVJhV_zc_bp2InrXlKD_vap9oec0/edit");
+    year_sheet = cve_spreadsheet.getSheets()[1];
+
+    var range = year_sheet.getRange(1, 1, year_sheet.getLastRow(), 3);
+    var values = range.getValues();
+    for (var i=0; i < values.length; i++) {
+      var cve = values[i][0].toString();
+      var title = values[i][1].toString();
+      var bugid = values[i][2].toString();
+
+      if (cve.length > 0 && title.length == 0 && bugid.length > 0) {
+        Logger.log("Need to assign %s to %s", cve, bugid);
+        // Here is one we need to assign
+
+        var query = new Query(API_KEY, "https://bugzilla.mozilla.org/rest/bug?id=" + bugid + "&include_fields=summary");
+        var summary = query.get()[0]['summary'];
+        Logger.log("Setting summary to %s", summary)
+
+        var assign_to = year_sheet.getRange(i+1, 2);
+        assign_to.setValue(summary);
+
+        UpdateQuery(API_KEY, bugid, cve);
+      }
+    }
+    
+    
+
+    
+
+  
+}
