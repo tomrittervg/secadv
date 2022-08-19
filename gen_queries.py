@@ -14,7 +14,7 @@ It's because 68.10 is mathematically equal to 68.1 but they are different versio
 def versionToESRs(version):
     version = int(version)
 
-    knownESRs = [60, 68, 78, 91]
+    knownESRs = [60, 68, 78, 91, 102]
     twoESRVersions = []
     for x in knownESRs:
         twoESRVersions.append(x)
@@ -215,19 +215,34 @@ def rollupListMainAndESR(primaryVersion, esrVersion):
     "&f3=status_whiteboard&o3=substring&v3=adv-esr" + esrVersion + "%2Br" + \
     "&f4=CP"
 
+def rollupListMainOnly(primaryVersion, allEsrVersions):
+    s = "https://bugzilla.mozilla.org/rest/bug?" + \
+    "&f1=OP" + \
+    "&f2=status_whiteboard&o2=substring&v2=adv-main" + primaryVersion + "%2Br"
+    "&f3=status_whiteboard&o3=notsubstring&v3=adv-esr" + allEsrVersions[0] + "%2Br"
+    if len(allEsrVersions) > 1:
+        s += "&f4=status_whiteboard&o4=notsubstring&v4=adv-esr" + allEsrVersions[1] + "%2Br&f5=CP"
+    else:
+        s += "&f4=CP"
+    return s
 
-def rollupListMainOnly(primaryVersion, esrVersion):
+def rollupListMain(primaryVersion):
     return "https://bugzilla.mozilla.org/rest/bug?" + \
     "&f1=OP" + \
     "&f2=status_whiteboard&o2=substring&v2=adv-main" + primaryVersion + "%2Br" + \
-    "&f3=status_whiteboard&o3=notsubstring&v3=adv-esr" + esrVersion + "%2Br" + \
-    "&f4=CP"
+    "&f3=CP"
 
 def rollupListESROnly(primaryVersion, esrVersion):
     return "https://bugzilla.mozilla.org/rest/bug?" + \
     "&f1=OP" + \
     "&f2=status_whiteboard&o2=notsubstring&v2=adv-main" + primaryVersion + "%2Br" + \
     "&f3=status_whiteboard&o3=substring&v3=adv-esr" + esrVersion + "%2Br" + \
+    "&f4=CP"
+
+def rollupListESR(esrVersion):
+    return "https://bugzilla.mozilla.org/rest/bug?" + \
+    "&f1=OP" + \
+    "&f2=status_whiteboard&o2=substring&v2=adv-esr" + esrVersion + "%2Br" + \
     "&f4=CP"
 
 #------------------------

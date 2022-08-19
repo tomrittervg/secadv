@@ -14,12 +14,8 @@ try:
 except:
     APIKEY = None
 
-from gen_queries import versionToESRs, nonRollupList, rollupListMainAndESR, rollupListMainOnly, rollupListESROnly
+from gen_queries import versionToESRs, nonRollupList, rollupListMainAndESR, rollupListMainOnly, rollupListMain, rollupListESROnly, rollupListESR
 from yml_utils import *
-
-def getBugs(targetVersion, mainVersion, esr):
-    url = nonRollupList(targetVersion, mainVersion, esr).replace("buglist.cgi", "rest/bug") + "&api_key=" + APIKEY
-    return doBugRequest(url)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Generate a security release .yml')
@@ -36,42 +32,99 @@ if __name__ == "__main__":
         eprint("This is a dot-release. If this is an ESR release, be sure to put the full version and --esr")
 
     mainVersion = args.version
-    esrVersion = versionToESRs(float(args.version))
-    if len(esrVersion) > 1:
-        if args.esr <= len(esrVersion):
-            esrVersion = str(esrVersion[args.esr - 1])
+    allEsrVersions = versionToESRs(float(args.version))
+    if len(allEsrVersions) > 1:
+        if args.esr <= len(allEsrVersions):
+            esrVersion = str(allEsrVersions[args.esr - 1])
         else:
             eprint("--esr was specified more times than we have ESR versions to generate")
     else:
-        esrVersion = esrVersion[0]
+        esrVersion = allEsrVersions[0]
     targetVersion = esrVersion if args.esr else mainVersion
     eprint("Generating advisories for Version", targetVersion, ("(which is an ESR release)" if args.esr else ""))
 
+    # -------------------------------------------------------------
     # Figure out the rollup situation
+    # This is easy if there is only one ESR version and hard if there are two.
+    # With one ESR, bugs will either be non-rollup, rollup-to-main, rollup-to-esr, or rollup-to-main-and-esr
+    # With two ESRs, bugs could be non-rollup, rollup-to-main, rollup-to-esr1, rollup-to-esr2, rollup-to-main-and-esr1, rollup-to-main-and-esr2, rollup-to-esr1-and-esr2, or rollup-to-main-and-esr1-and-esr2
+    # We're giong to try and detect this behavior but only warn the user about it.
+
+    nonRollUpBugs = []
+    sharedRollupBugs = []
+    rollUpBugs = []
+
     url = rollupListMainAndESR(mainVersion, esrVersion) + "&api_key=" + APIKEY
-    shared_rollups = doBugRequest(url)
+    sharedRollupBugs = doBugRequest(url)
     if not args.esr:
-        url = rollupListMainOnly(mainVersion, esrVersion) + "&api_key=" + APIKEY
+        url = rollupListMainOnly(mainVersion, allEsrVersions) + "&api_key=" + APIKEY
     else:
         url = rollupListESROnly(mainVersion, esrVersion) + "&api_key=" + APIKEY
     version_specific_rollups = doBugRequest(url)
 
     # Non-rollup bugs
-    bugs = getBugs(targetVersion, mainVersion, args.esr)
+    url = nonRollupList(targetVersion, mainVersion, args.esr).replace("buglist.cgi", "rest/bug") + "&api_key=" + APIKEY
+    nonRollUpBugs = doBugRequest(url)
+
+    if len(allEsrVersions) > 1:
+        assert(len(allEsrVersions) == 2)
+
+        non_rollup = set([b['id'] for b in doBugRequest(nonRollupList(targetVersion, mainVersion, args.esr).replace("buglist.cgi", "rest/bug") + "&api_key=" + APIKEY)])
+        rollup_to_main = set([b['id'] for b in doBugRequest(rollupListMain(mainVersion) + "&api_key=" + APIKEY)])
+        rollup_to_esr1 = set([b['id'] for b in doBugRequest(rollupListESR(allEsrVersions[0]) + "&api_key=" + APIKEY)])
+        rollup_to_esr2 = set([b['id'] for b in doBugRequest(rollupListESR(allEsrVersions[1]) + "&api_key=" + APIKEY)])
+        rollup_to_main_and_esr1 = rollup_to_main.intersection(rollup_to_esr1)
+        rollup_to_main_and_esr2 = rollup_to_main.intersection(rollup_to_esr2)
+        rollup_to_esr1_and_esr2 = rollup_to_esr1.intersection(rollup_to_esr2)
+        rollup_to_main_and_esr1_and_esr2 = rollup_to_main.intersection(rollup_to_esr1).intersection(rollup_to_esr2)
+
+        eprint("OKAY, so you've got two ESR versions, the rollups are going to be complicated.")
+        eprint("I'm _not_ going to correctly write the rollup advisories, but I will try to make it easier for you by telling you the bug numbers.")
+        eprint("If any of these lists is a single bug, you're probably going to need to write an advisory for it, and manually insert it into the correct yaml file")
+
+        # rollup-to-main-and-esr1-and-esr2
+        if rollup_to_main_and_esr1_and_esr2:
+            eprint("Bugs that are in all three %s, %s, and %s: %s" % (mainVersion, allEsrVersions[0], allEsrVersions[1], rollup_to_main_and_esr1_and_esr2))
+        
+        # rollup-to-esr1-and-esr2
+        if rollup_to_esr1_and_esr2 - rollup_to_main:
+            eprint("Bugs that are in only the ESRs %s and %s: %s" % (allEsrVersions[0], allEsrVersions[1], rollup_to_esr1_and_esr2 - rollup_to_main))
+
+        # rollup-to-main-and-esr1
+        if rollup_to_main_and_esr1 - rollup_to_esr2:
+            eprint("Bugs that are only in %s and %s: %s" % (mainVersion, allEsrVersions[0], rollup_to_main_and_esr1 - rollup_to_esr2))
+        # rollup-to-main-and-esr2
+        if rollup_to_main_and_esr2 - rollup_to_esr1:
+            eprint("Bugs that are only in %s and %s: %s" % (mainVersion, allEsrVersions[1], rollup_to_main_and_esr2 - rollup_to_esr1))
+
+        # rollup-to-main
+        if rollup_to_main - rollup_to_esr1 - rollup_to_esr2:
+            eprint("Bugs that are only in %s and not in either ESR: %s" % (mainVersion, rollup_to_main - rollup_to_esr1 - rollup_to_esr2))
+
+        # rollup-to-esr2
+        if rollup_to_esr2 - rollup_to_esr1 - rollup_to_main:
+            eprint("Bugs that are only in %s and not in %s or %s: %s" % (allEsrVersions[1], allEsrVersions[0], mainVersion, rollup_to_esr2 - rollup_to_esr1 - rollup_to_main))
+
+        # rollup-to-esr1
+        if rollup_to_esr1 - rollup_to_esr2 - rollup_to_main:
+            eprint("Bugs that are only in %s and not in %s or %s: %s" % (allEsrVersions[0], allEsrVersions[1], mainVersion, rollup_to_esr1 - rollup_to_esr2 - rollup_to_main))
+
+
     advisories = []
-    for b in bugs:
+    for b in nonRollUpBugs:
         if b['id'] in [1441468, 1587976] or (args.exclude is not None and str(b['id']) in args.exclude):
             continue
         advisories.append(Advisory(b, getAdvisoryAttachment(b['id'])))
 
-    if len(shared_rollups) == 1:
-        b = shared_rollups[0]
+    if len(sharedRollupBugs) == 1:
+        b = sharedRollupBugs[0]
         if (args.exclude is None or str(b['id']) not in args.exclude):
             try:
                 advisories.append(Advisory(b, getAdvisoryAttachment(b['id'])))
             except:
                 raise Exception("Could not find an advisory for %s which is the only bug in the shared rollup." % b['id'])
-            shared_rollups = []
+            sharedRollupBugs = []
+
     if len(version_specific_rollups) == 1:
         b = version_specific_rollups[0]
         if (args.exclude is None or str(b['id']) not in args.exclude):
@@ -140,16 +193,16 @@ if __name__ == "__main__":
         print("        desc: Memory safety bugs fixed in", versionTitle)
 
     # Rollup Bug for Main + ESR. Always do this one.
-    doRollups(shared_rollups,
+    doRollups(sharedRollupBugs,
         "Firefox " + mainVersion + " and Firefox ESR " + esrVersion,
         "Firefox " + str(int(mainVersion)-1) + " and Firefox ESR " + str(float(esrVersion)-.1))
     if not args.esr:
     # Rollup Bug for Main Only 
-        doRollups(version_specific_rollups,
+        doRollups(rollUpBugs,
             "Firefox " + mainVersion,
             "Firefox " + str(int(mainVersion)-1))
     else:
     # Rollup bug for ESR only
-        doRollups(version_specific_rollups,
+        doRollups(rollUpBugs,
             "Firefox ESR " + esrVersion,
             "Firefox ESR " + str(float(esrVersion) - .1))
