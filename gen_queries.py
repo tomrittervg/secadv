@@ -82,7 +82,7 @@ def toAssignMain(version):
     "&classification=Other" + \
     \
     "&f1=OP" + \
-    "&f2=cf_status_firefox" + prior + "&o2=nowordssubstr&v2=fixed%20verified%20unaffected%20disabled" + \
+    "&f2=cf_status_firefox" + prior + "&o2=nowordssubstr&v2=fixed%20verified%20disabled" + \
     "&f3=CP" + \
     \
     "&f4=OP&j4=OR" + \
@@ -138,7 +138,7 @@ def toWriteMain(version):
     "&classification=Other" + \
     \
     "&f1=OP" + \
-    "&f2=cf_status_firefox" + prior + "&o2=nowordssubstr&v2=fixed%20verified%20unaffected%20disabled" + \
+    "&f2=cf_status_firefox" + prior + "&o2=nowordssubstr&v2=fixed%20verified%20disabled" + \
     "&f3=CP" + \
     \
     "&f4=OP&j4=OR" + \
