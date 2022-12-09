@@ -71,8 +71,11 @@ def sortAdvisories(advisories):
         if a.severity == "low":
             yield a
 
+def bugLinkToRest(link):
+    return link.replace("/buglist.cgi?query_format=advanced", "/rest/bug?")
+
 def doBugRequest(link):
-    r = requests.get(link)
+    r = requests.get(bugLinkToRest(link))
     bugs = r.json()
     return bugs['bugs']
 

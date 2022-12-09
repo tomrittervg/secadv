@@ -193,7 +193,7 @@ def toWriteESR(esrVersion, primaryVersion):
 #------------------------
 def rollupList(version, primaryVersion, esr):
     if esr:
-        return rollupListESR(version, primaryVersion)
+        return rollupListESR(version)
     else:
         return rollupListMain(version)
 def rollupListMain(version):
@@ -202,23 +202,23 @@ def rollupListMain(version):
     "&f2=status_whiteboard&o2=substring&v2=adv-main" + version + "%2Br" + \
     "&f3=CP"
 
-def rollupListESR(esrVersion, primaryVersion):
+def rollupListESR(esrVersion):
     return "https://bugzilla.mozilla.org/buglist.cgi?query_format=advanced" + \
     "&f1=OP" + \
     "&f2=status_whiteboard&o2=substring&v2=adv-esr" + esrVersion + "%2Br" + \
     "&f3=CP"
 
 def rollupListMainAndESR(primaryVersion, esrVersion):
-    return "https://bugzilla.mozilla.org/rest/bug?" + \
+    return "https://bugzilla.mozilla.org/buglist.cgi?query_format=advanced" + \
     "&f1=OP" + \
     "&f2=status_whiteboard&o2=substring&v2=adv-main" + primaryVersion + "%2Br" + \
     "&f3=status_whiteboard&o3=substring&v3=adv-esr" + esrVersion + "%2Br" + \
     "&f4=CP"
 
 def rollupListMainOnly(primaryVersion, allEsrVersions):
-    s = "https://bugzilla.mozilla.org/rest/bug?" + \
+    s = "https://bugzilla.mozilla.org/buglist.cgi?query_format=advanced" + \
     "&f1=OP" + \
-    "&f2=status_whiteboard&o2=substring&v2=adv-main" + primaryVersion + "%2Br"
+    "&f2=status_whiteboard&o2=substring&v2=adv-main" + primaryVersion + "%2Br" + \
     "&f3=status_whiteboard&o3=notsubstring&v3=adv-esr" + allEsrVersions[0] + "%2Br"
     if len(allEsrVersions) > 1:
         s += "&f4=status_whiteboard&o4=notsubstring&v4=adv-esr" + allEsrVersions[1] + "%2Br&f5=CP"
@@ -227,22 +227,16 @@ def rollupListMainOnly(primaryVersion, allEsrVersions):
     return s
 
 def rollupListMain(primaryVersion):
-    return "https://bugzilla.mozilla.org/rest/bug?" + \
+    return "https://bugzilla.mozilla.org/buglist.cgi?query_format=advanced" + \
     "&f1=OP" + \
     "&f2=status_whiteboard&o2=substring&v2=adv-main" + primaryVersion + "%2Br" + \
     "&f3=CP"
 
 def rollupListESROnly(primaryVersion, esrVersion):
-    return "https://bugzilla.mozilla.org/rest/bug?" + \
+    return "https://bugzilla.mozilla.org/buglist.cgi?query_format=advanced" + \
     "&f1=OP" + \
     "&f2=status_whiteboard&o2=notsubstring&v2=adv-main" + primaryVersion + "%2Br" + \
     "&f3=status_whiteboard&o3=substring&v3=adv-esr" + esrVersion + "%2Br" + \
-    "&f4=CP"
-
-def rollupListESR(esrVersion):
-    return "https://bugzilla.mozilla.org/rest/bug?" + \
-    "&f1=OP" + \
-    "&f2=status_whiteboard&o2=substring&v2=adv-esr" + esrVersion + "%2Br" + \
     "&f4=CP"
 
 #------------------------
@@ -337,6 +331,14 @@ if __name__ == "__main__":
 
         print("Non-rollup advisories:")
         print(nonRollupList(version, primaryVersion, i != 0))
+        print("")
+
+        if i > 0:
+            print("ESR-Specific Rollups:")
+            print(rollupListESROnly(primaryVersion, version))
+        else:
+            print("Version-Specific Rollups:")
+            print(rollupListMainOnly(primaryVersion, versions[1:]))
         print("")
 
         print("Advisories considered and rejected:")
