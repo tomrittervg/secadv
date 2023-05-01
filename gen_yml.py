@@ -111,10 +111,24 @@ if __name__ == "__main__":
 
 
     advisories = []
+    references = []
     for b in nonRollUpBugs:
         if b['id'] in [1441468, 1587976] or (args.exclude is not None and str(b['id']) in args.exclude):
             continue
-        advisories.append(Advisory(b, getAdvisoryAttachment(b['id'])))
+        
+        attachment_text = getAdvisoryAttachment(b['id'])
+        
+        if Advisory.is_reference(attachment_text):
+            references.append((Advisory.is_reference(attachment_text), b['id'], getSeverity(b)))
+        else:
+            advisories.append(Advisory(b, attachment_text))
+
+    for r in references:
+        target_adv = list(filter(lambda a: a.id == r[0], advisories))[0]
+        target_adv.ids.append(r[1])
+        target_adv.severity = getMaxSeverity(target_adv.severity, r[2])
+        eprint("Ensure that the reporter for %s is the same as %s - if not, add the reporter of %s in the yml manually. bmo %s,%s" % (r[1], target_adv.id, r[1], target_adv.id, r[1]))
+
 
     if len(sharedRollupBugs) == 1:
         b = sharedRollupBugs[0]
@@ -157,7 +171,8 @@ if __name__ == "__main__":
         print("    description: |")
         print("      " + a.description)
         print("    bugs:")
-        print("      - url:", a.id)
+        for each_id in a.ids:
+            print("      - url:", each_id)
 
     def doRollups(buglist, versionTitle, priorVersionTitle):
         if len(buglist) == 0:

@@ -12,8 +12,10 @@ from apikey import APIKEY
 class Advisory:
     def __init__(self, bugJSON, advisoryText):
         self.id = bugJSON['id']
+        self.ids = [ bugJSON['id'] ]
         self.severity = getSeverity(bugJSON)
         advisory_lines = advisoryText.decode("utf-8").split("\n")
+
         self.cve = bugJSON['alias'] if bugJSON['alias'] else ""
         self.title = advisory_lines[0].strip()
         self.reporter = advisory_lines[1].strip() #cleanUpRealName(bugJSON['creator_details']['real_name'])
@@ -33,6 +35,12 @@ class Advisory:
         if ":" in self.title:
             return "'" + self.title + "'"
         return self.title
+    @staticmethod
+    def is_reference(advisoryText):
+        advisory_lines = advisoryText.decode("utf-8").split("\n")
+        if "ref:" in advisory_lines[0]:
+            return int(advisory_lines[0].replace("ref:", "").strip())
+        return None
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
