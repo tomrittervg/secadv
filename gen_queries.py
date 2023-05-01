@@ -118,7 +118,7 @@ def toAssignESR(esrVersion, primaryVersion):
     \
     "&f7=OP&j7=OR" + \
     "&f8=keywords&o8=regexp&v8=sec-%28.%2B%29" + \
-    "&f9=bug_group&o9=substring&v9=%20core-security%20" + \
+    "&f9=bug_group&o9=anywords&v9=%20core-security%20" + \
     "&f10=CP"
 
 
