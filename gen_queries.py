@@ -74,51 +74,30 @@ def toAssign(version, primaryVersion, esr):
         return toAssignMain(version)
 def toAssignMain(version):
     prior = getPriorVersion(version)
-    return "https://bugzilla.mozilla.org/buglist.cgi?query_format=advanced" + \
+    return "https://bugzilla.mozilla.org/buglist.cgi?" + \
     \
-    "&classification=Client%20Software" + \
-    "&classification=Developer%20Infrastructure" + \
-    "&classification=Components" + \
-    "&classification=Other" + \
+    "&f2=cf_status_firefox" + prior + "&o2=nowords&v2=fixed%20verified%20disabled%20unaffected" + \
     \
-    "&f1=OP" + \
-    "&f2=cf_status_firefox" + prior + "&o2=nowordssubstr&v2=fixed%20verified%20disabled" + \
-    "&f3=CP" + \
+    "&f5=cf_status_firefox" + version + "&o5=anywords&v5=fixed%20verified" + \
     \
-    "&f4=OP&j4=OR" + \
-    "&f5=cf_status_firefox" + version + "&o5=equals&v5=fixed" + \
-    "&f6=cf_status_firefox" + version + "&o6=equals&v6=verified" + \
-    "&f7=CP" + \
-    \
-    "&f8=OP" + \
     "&f9=status_whiteboard&o9=notsubstring&v9=adv-main" + version + \
-    "&f10=CP" + \
     \
     "&f11=OP&j11=OR" + \
-    "&f12=keywords&o12=regexp&v12=sec-%28.%2B%29" + \
-    "&f13=bug_group&o13=substring&v13=%20core-security%20" + \
+    "&f12=keywords&o12=substring&v12=sec-" + \
+    "&f13=bug_group&o13=substring&v13=core-security" + \
     "&f14=CP"
 
 def toAssignESR(esrVersion, primaryVersion):
     esrBaseVersion = str(int(float(esrVersion)))
-    return "https://bugzilla.mozilla.org/buglist.cgi?query_format=advanced" + \
+    return "https://bugzilla.mozilla.org/buglist.cgi?" + \
     \
-    "&classification=Client%20Software" + \
-    "&classification=Developer%20Infrastructure" + \
-    "&classification=Components" + \
-    "&classification=Other" + \
-    \
-    "&f1=OP&j1=OR" + \
     "&f2=cf_tracking_firefox_esr" + esrBaseVersion + "&o2=equals&v2=" + primaryVersion + "%2B" + \
-    "&f3=CP" + \
     \
-    "&f4=OP" + \
     "&f5=status_whiteboard&o5=notsubstring&v5=adv-esr" + esrVersion + \
-    "&f6=CP" + \
     \
     "&f7=OP&j7=OR" + \
-    "&f8=keywords&o8=regexp&v8=sec-%28.%2B%29" + \
-    "&f9=bug_group&o9=anywords&v9=%20core-security%20" + \
+    "&f8=keywords&o8=substring&v8=sec-" + \
+    "&f9=bug_group&o9=substring&v9=core-security" + \
     "&f10=CP"
 
 
@@ -130,63 +109,36 @@ def toWrite(version, primaryVersion, esr):
         return toWriteMain(version)
 def toWriteMain(version):
     prior = getPriorVersion(version)
-    return "https://bugzilla.mozilla.org/buglist.cgi?query_format=advanced" + \
+    return "https://bugzilla.mozilla.org/buglist.cgi?" + \
     \
-    "&classification=Client%20Software" + \
-    "&classification=Developer%20Infrastructure" + \
-    "&classification=Components" + \
-    "&classification=Other" + \
+    "&f2=cf_status_firefox" + prior + "&o2=nowords&v2=fixed%20verified%20disabled%20unaffected" + \
     \
-    "&f1=OP" + \
-    "&f2=cf_status_firefox" + prior + "&o2=nowordssubstr&v2=fixed%20verified%20disabled" + \
-    "&f3=CP" + \
+    "&f5=cf_status_firefox" + version + "&o5=anywords&v5=fixed%20verified" + \
     \
-    "&f4=OP&j4=OR" + \
-    "&f5=cf_status_firefox" + version + "&o5=equals&v5=fixed" + \
-    "&f6=cf_status_firefox" + version + "&o6=equals&v6=verified" + \
-    "&f7=CP" + \
-    \
-    "&f8=OP" + \
     "&f9=status_whiteboard&o9=substring&v9=adv-main" + version + "%2B" + \
     "&f10=status_whiteboard&o10=notsubstring&v10=adv-main" + version + "%2Br" + \
-    "&f11=CP" + \
     \
-    "&f12=OP" + \
     "&f13=attachments.description&o13=equals&v13=advisory.txt&n13=1" + \
-    "&f14=CP" + \
     \
     "&f15=OP&j15=OR" + \
-    "&f16=keywords&o16=regexp&v16=sec-%28.%2B%29" + \
-    "&f17=bug_group&o17=substring&v17=%20core-security%20" + \
+    "&f16=keywords&o16=substring&v16=sec-" + \
+    "&f17=bug_group&o17=substring&v17=core-security" + \
     "&f18=CP"
 
 def toWriteESR(esrVersion, primaryVersion):
     esrBaseVersion = str(int(float(esrVersion)))
-    return "https://bugzilla.mozilla.org/buglist.cgi?query_format=advanced" + \
+    return "https://bugzilla.mozilla.org/buglist.cgi?" + \
     \
-    "&classification=Client%20Software" + \
-    "&classification=Developer%20Infrastructure" + \
-    "&classification=Components" + \
-    "&classification=Other" + \
-    \
-    "&keywords=sec-%28.%2B%29&keywords_type=regexp" + \
-    \
-    "&f1=OP" + \
     "&f2=cf_tracking_firefox_esr" + esrBaseVersion + "&o2=equals&v2=" + primaryVersion + "%2B" + \
-    "&f3=CP" + \
     \
-    "&f4=OP" + \
     "&f5=status_whiteboard&o5=substring&v5=adv-esr" + esrVersion + "%2B" + \
     "&f6=status_whiteboard&o6=notsubstring&v6=adv-esr" + esrVersion + "%2Br" + \
-    "&f7=CP" + \
     \
-    "&f8=OP" + \
     "&f9=attachments.description&o9=equals&v9=advisory.txt&n9=1" + \
-    "&f10=CP" + \
     \
     "&f11=OP&j11=OR" + \
-    "&f12=keywords&o12=regexp&v12=sec-%28.%2B%29" + \
-    "&f13=bug_group&o13=substring&v13=%20core-security%20" + \
+    "&f12=keywords&o12=substring&v12=sec-" + \
+    "&f13=bug_group&o13=substring&v13=core-security" + \
     "&f14=CP"
 
 
@@ -197,47 +149,34 @@ def rollupList(version, primaryVersion, esr):
     else:
         return rollupListMain(version)
 def rollupListMain(version):
-    return "https://bugzilla.mozilla.org/buglist.cgi?query_format=advanced" + \
-    "&f1=OP" + \
-    "&f2=status_whiteboard&o2=substring&v2=adv-main" + version + "%2Br" + \
-    "&f3=CP"
+    return "https://bugzilla.mozilla.org/buglist.cgi?" + \
+    "&f1=status_whiteboard&o1=substring&v1=adv-main" + version + "%2Br"
 
 def rollupListESR(esrVersion):
-    return "https://bugzilla.mozilla.org/buglist.cgi?query_format=advanced" + \
-    "&f1=OP" + \
-    "&f2=status_whiteboard&o2=substring&v2=adv-esr" + esrVersion + "%2Br" + \
-    "&f3=CP"
+    return "https://bugzilla.mozilla.org/buglist.cgi?" + \
+    "&f1=status_whiteboard&o1=substring&v1=adv-esr" + esrVersion + "%2Br"
 
 def rollupListMainAndESR(primaryVersion, esrVersion):
-    return "https://bugzilla.mozilla.org/buglist.cgi?query_format=advanced" + \
-    "&f1=OP" + \
+    return "https://bugzilla.mozilla.org/buglist.cgi?" + \
     "&f2=status_whiteboard&o2=substring&v2=adv-main" + primaryVersion + "%2Br" + \
-    "&f3=status_whiteboard&o3=substring&v3=adv-esr" + esrVersion + "%2Br" + \
-    "&f4=CP"
+    "&f3=status_whiteboard&o3=substring&v3=adv-esr" + esrVersion + "%2Br"
 
 def rollupListMainOnly(primaryVersion, allEsrVersions):
-    s = "https://bugzilla.mozilla.org/buglist.cgi?query_format=advanced" + \
-    "&f1=OP" + \
+    s = "https://bugzilla.mozilla.org/buglist.cgi?" + \
     "&f2=status_whiteboard&o2=substring&v2=adv-main" + primaryVersion + "%2Br" + \
     "&f3=status_whiteboard&o3=notsubstring&v3=adv-esr" + allEsrVersions[0] + "%2Br"
     if len(allEsrVersions) > 1:
-        s += "&f4=status_whiteboard&o4=notsubstring&v4=adv-esr" + allEsrVersions[1] + "%2Br&f5=CP"
-    else:
-        s += "&f4=CP"
+        s += "&f4=status_whiteboard&o4=notsubstring&v4=adv-esr" + allEsrVersions[1] + "%2Br"
     return s
 
 def rollupListMain(primaryVersion):
-    return "https://bugzilla.mozilla.org/buglist.cgi?query_format=advanced" + \
-    "&f1=OP" + \
-    "&f2=status_whiteboard&o2=substring&v2=adv-main" + primaryVersion + "%2Br" + \
-    "&f3=CP"
+    return "https://bugzilla.mozilla.org/buglist.cgi?" + \
+    "&f1=status_whiteboard&o1=substring&v1=adv-main" + primaryVersion + "%2Br"
 
 def rollupListESROnly(primaryVersion, esrVersion):
-    return "https://bugzilla.mozilla.org/buglist.cgi?query_format=advanced" + \
-    "&f1=OP" + \
+    return "https://bugzilla.mozilla.org/buglist.cgi?" + \
     "&f2=status_whiteboard&o2=notsubstring&v2=adv-main" + primaryVersion + "%2Br" + \
-    "&f3=status_whiteboard&o3=substring&v3=adv-esr" + esrVersion + "%2Br" + \
-    "&f4=CP"
+    "&f3=status_whiteboard&o3=substring&v3=adv-esr" + esrVersion + "%2Br"
 
 #------------------------
 def allAdvisories(version, primaryVersion, esr):
@@ -246,15 +185,11 @@ def allAdvisories(version, primaryVersion, esr):
     else:
         return allAdvisoriesMain(version)
 def allAdvisoriesMain(version):
-    return "https://bugzilla.mozilla.org/buglist.cgi?query_format=advanced" + \
-    "&f1=OP" + \
-    "&f2=status_whiteboard&o2=substring&v2=adv-main" + version + "%2B" \
-    "&f3=CP"
+    return "https://bugzilla.mozilla.org/buglist.cgi?" + \
+    "&f2=status_whiteboard&o2=substring&v2=adv-main" + version + "%2B"
 def allAdvisoriesESR(esrVersion, primaryVersion):
-    return "https://bugzilla.mozilla.org/buglist.cgi?query_format=advanced" + \
-    "&f1=OP" + \
-    "&f2=status_whiteboard&o2=substring&v2=adv-esr" + esrVersion + "%2B" + \
-    "&f3=CP"
+    return "https://bugzilla.mozilla.org/buglist.cgi?" + \
+    "&f2=status_whiteboard&o2=substring&v2=adv-esr" + esrVersion + "%2B"
 
 #------------------------
 def nonRollupList(version, primaryVersion, esr):
@@ -263,17 +198,13 @@ def nonRollupList(version, primaryVersion, esr):
     else:
         return nonRollupListMain(version)
 def nonRollupListMain(version):
-    return "https://bugzilla.mozilla.org/buglist.cgi?query_format=advanced" + \
-    "&f1=OP" + \
+    return "https://bugzilla.mozilla.org/buglist.cgi?" + \
     "&f2=status_whiteboard&o2=substring&v2=adv-main" + version + "%2B" \
-    "&f3=status_whiteboard&o3=notsubstring&v3=adv-main" + version + "%2Br" + \
-    "&f4=CP"
+    "&f3=status_whiteboard&o3=notsubstring&v3=adv-main" + version + "%2Br"
 def nonRollupListESR(esrVersion, primaryVersion):
-    return "https://bugzilla.mozilla.org/buglist.cgi?query_format=advanced" + \
-    "&f1=OP" + \
+    return "https://bugzilla.mozilla.org/buglist.cgi?" + \
     "&f2=status_whiteboard&o2=substring&v2=adv-esr" + esrVersion + "%2B" + \
-    "&f3=status_whiteboard&o3=notsubstring&v3=adv-esr" + esrVersion + "%2Br" + \
-    "&f4=CP"
+    "&f3=status_whiteboard&o3=notsubstring&v3=adv-esr" + esrVersion + "%2Br"
 
 #------------------------
 def rejected(version, primaryVersion, esr):
@@ -282,15 +213,11 @@ def rejected(version, primaryVersion, esr):
     else:
         return rejectedMain(version)
 def rejectedMain(version):
-    return "https://bugzilla.mozilla.org/buglist.cgi?query_format=advanced" + \
-    "&f1=OP" + \
-    "&f2=status_whiteboard&o2=substring&v2=adv-main" + version + "-" \
-    "&f3=CP"
+    return "https://bugzilla.mozilla.org/buglist.cgi?" + \
+    "&f2=status_whiteboard&o2=substring&v2=adv-main" + version + "-" 
 def rejectedESR(esrVersion, primaryVersion):
-    return "https://bugzilla.mozilla.org/buglist.cgi?query_format=advanced" + \
-    "&f1=OP" + \
-    "&f2=status_whiteboard&o2=substring&v2=adv-esr" + esrVersion + "-" + \
-    "&f3=CP"
+    return "https://bugzilla.mozilla.org/buglist.cgi?" + \
+    "&f2=status_whiteboard&o2=substring&v2=adv-esr" + esrVersion + "-"
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Print Bugzilla queries for Security Advisories')
