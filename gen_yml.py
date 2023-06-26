@@ -196,28 +196,28 @@ if __name__ == "__main__":
             except:
                 pass
 
-        rollupEnd = "reported memory safety bugs present in " + priorVersionTitle + ". Some of these bugs showed evidence of memory corruption and we presume that with enough effort some of these could have been exploited to run arbitrary code."
+        description = "Memory safety bugs present in " + priorVersionTitle + ". Some of these bugs showed evidence of memory corruption and we presume that with enough effort some of these could have been exploited to run arbitrary code."
         print("  CVE-XXX-rollup:")
         print("    title: Memory safety bugs fixed in", versionTitle)
         print("    impact:", rollupMaxSeverity)
-        print("    reporter: Mozilla developers and community")
+        print("    reporter:", ", ".join(rollupReporters))
         print("    description: |")
-        print("      Mozilla developers and community members", ", ".join(rollupReporters), rollupEnd)
+        print("     ", description)
         print("    bugs:")
         print("      - url:", ", ".join([str(i) for i in rollupIDs]))
         print("        desc: Memory safety bugs fixed in", versionTitle)
 
     # Rollup Bug for Main + ESR. Always do this one.
     doRollups(sharedRollupBugs,
-        "Firefox " + mainVersion + " and Firefox ESR " + esrVersion,
-        "Firefox " + str(int(mainVersion)-1) + " and Firefox ESR " + str(float(esrVersion)-.1))
+        f"Firefox {mainVersion}, Firefox ESR {esrVersion}, and Thunderbird {esrVersion}",
+        f"Firefox {str(int(mainVersion)-1)}, Firefox ESR {float(esrVersion)-.1}, and Thunderbird {float(esrVersion)-.1}")
     if not args.esr:
     # Rollup Bug for Main Only 
         doRollups(version_specific_rollups,
-            "Firefox " + mainVersion,
-            "Firefox " + str(int(mainVersion)-1))
+            f"Firefox {mainVersion}",
+            f"Firefox {int(mainVersion)-1}")
     else:
     # Rollup bug for ESR only
         doRollups(version_specific_rollups,
-            "Firefox ESR " + esrVersion,
-            "Firefox ESR " + str(float(esrVersion) - .1))
+            f"Firefox ESR {esrVersion}",
+            f"Firefox ESR {float(esrVersion) - .1}")
