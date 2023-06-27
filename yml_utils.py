@@ -80,7 +80,7 @@ def sortAdvisories(advisories):
             yield a
 
 def bugLinkToRest(link):
-    return link.replace("/buglist.cgi?query_format=advanced", "/rest/bug?")
+    return link.replace("/buglist.cgi?", "/rest/bug?")
 
 def doBugRequest(link):
     r = requests.get(bugLinkToRest(link))
