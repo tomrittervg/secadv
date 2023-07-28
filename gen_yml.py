@@ -14,7 +14,7 @@ try:
 except:
     APIKEY = None
 
-from gen_queries import versionToESRs, nonRollupList, rollupListMainAndESR, rollupListMainOnly, rollupListMain, rollupListESROnly, rollupListESR
+from gen_queries import getPriorVersion, versionToESRs, nonRollupList, rollupListMainAndESR, rollupListMainOnly, rollupListMain, rollupListESROnly, rollupListESR
 from yml_utils import *
 
 if __name__ == "__main__":
@@ -210,7 +210,7 @@ if __name__ == "__main__":
     # Rollup Bug for Main + ESR. Always do this one.
     doRollups(sharedRollupBugs,
         f"Firefox {mainVersion}, Firefox ESR {esrVersion}, and Thunderbird {esrVersion}",
-        f"Firefox {str(int(mainVersion)-1)}, Firefox ESR {float(esrVersion)-.1}, and Thunderbird {float(esrVersion)-.1}")
+        f"Firefox {int(mainVersion)-1}, Firefox ESR {getPriorVersion(esrVersion)}, and Thunderbird {getPriorVersion(esrVersion)}")
     if not args.esr:
     # Rollup Bug for Main Only 
         doRollups(version_specific_rollups,
@@ -220,4 +220,4 @@ if __name__ == "__main__":
     # Rollup bug for ESR only
         doRollups(version_specific_rollups,
             f"Firefox ESR {esrVersion}",
-            f"Firefox ESR {float(esrVersion) - .1}")
+            f"Firefox ESR {getPriorVersion(esrVersion)}")
