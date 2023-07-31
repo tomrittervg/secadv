@@ -32,12 +32,14 @@ if __name__ == "__main__":
         eprint("This is a dot-release. If this is an ESR release, be sure to put the full version and --esr")
 
     mainVersion = args.version
-    allEsrVersions = versionToESRs(float(args.version))
+    allEsrVersions = versionToESRs(args.version)
     if len(allEsrVersions) > 1:
+        assert len(allEsrVersions) <= 2
         if args.esr <= len(allEsrVersions):
             esrVersion = str(allEsrVersions[args.esr - 1])
         else:
             eprint("--esr was specified more times than we have ESR versions to generate")
+            sys.exit(1)
     else:
         esrVersion = allEsrVersions[0]
     targetVersion = esrVersion if args.esr else mainVersion
