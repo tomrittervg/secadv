@@ -229,18 +229,21 @@ if __name__ == "__main__":
         rollupIDs = []
         rollupReporters = set()
         rollupMaxSeverity = "low"
+        addFuzzing = False
         for b_id in buglist:
             b = allBugsById[b_id]
             rollupIDs.append(b_id)
             name = cleanUpRealName(b['creator_detail']['real_name'])
             if name in ["Christian Holler", "Jason Kratzer", "Tyson Smith", "Jesse Schwartzentruber"]:
-                rollupReporters.add("the Mozilla Fuzzing Team")
+                addFuzzing = True
             elif name not in ["Treeherder Bug Filer"]:
                 rollupReporters.add(name)
             try:
                 rollupMaxSeverity = getMaxSeverity(rollupMaxSeverity, getSeverity(b))
             except:
                 pass
+        if addFuzzing:
+            rollupReporters.add("the Mozilla Fuzzing Team")
 
         description = f"Memory safety {bug_str} present in {priorVersionTitle}. {some_str.capitalize()} {bug_str} showed evidence of memory corruption and we presume that with enough effort {some_str} could have been exploited to run arbitrary code."
         print("  CVE-XXX-rollup:")
