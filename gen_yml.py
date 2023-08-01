@@ -23,6 +23,7 @@ if __name__ == "__main__":
     parser.add_argument('--verbose', '-v', action='store_true', help='print(out debugging info')
     parser.add_argument('--esr', action='count', default=0, help='Generate the ESR document for the given full version. Specify twice to generate for the second ESR version of a release.')
     parser.add_argument('--exclude', action='append', help='Bug IDs to exclude from checks about attachments')
+    parser.add_argument('--allow-single', action='store_true', help='Allow single bug in rollups')
     parser.add_argument('version', help='Version to generate queries for. Do not give an ESR version; give the normal version and specify --esr')
     args = parser.parse_args(sys.argv[1:])
     if not APIKEY:
@@ -178,7 +179,10 @@ if __name__ == "__main__":
                 try:
                     advisories.append(Advisory(allBugsById[b], getAdvisoryAttachment(b)))
                 except:
-                    raise Exception(f"Could not find an advisory for {b} which is the only bug in rollup for {versions}.")
+                    if not args.allow_single:
+                        raise Exception(f"Could not find an advisory for {b} which is the only bug in rollup for {versions}.")
+                    else:
+                        filteredRollupCalls.append((rollupBugs, versions, priorVersions))
         else:
             filteredRollupCalls.append((rollupBugs, versions, priorVersions))
 
@@ -212,8 +216,15 @@ if __name__ == "__main__":
         if len(buglist) == 0:
             return
 
-        if len(buglist) == 1:
+        if len(buglist) == 1 and not args.allow_single:
             raise Exception("We shouldn't be here for a single bug.")
+
+        if len(buglist) == 1:
+            bug_str = "bug"
+            some_str = "this"
+        else:
+            bug_str = "bugs"
+            some_str = "some of these"
 
         rollupIDs = []
         rollupReporters = set()
@@ -231,16 +242,16 @@ if __name__ == "__main__":
             except:
                 pass
 
-        description = "Memory safety bugs present in " + priorVersionTitle + ". Some of these bugs showed evidence of memory corruption and we presume that with enough effort some of these could have been exploited to run arbitrary code."
+        description = f"Memory safety {bug_str} present in {priorVersionTitle}. {some_str.capitalize()} {bug_str} showed evidence of memory corruption and we presume that with enough effort {some_str} could have been exploited to run arbitrary code."
         print("  CVE-XXX-rollup:")
-        print("    title: Memory safety bugs fixed in", versionTitle)
+        print("    title: Memory safety", bug_str, "fixed in", versionTitle)
         print("    impact:", rollupMaxSeverity)
         print("    reporter:", ", ".join(rollupReporters))
         print("    description: |")
         print("     ", description)
         print("    bugs:")
         print("      - url:", ", ".join([str(i) for i in rollupIDs]))
-        print("        desc: Memory safety bugs fixed in", versionTitle)
+        print("        desc: Memory safety", bug_str, "fixed in", versionTitle)
 
     # Output all Rollup Bugs
     for rollupBugs, versions, priorVersions in filteredRollupCalls:
