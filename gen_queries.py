@@ -36,7 +36,7 @@ def versionToESRs(version):
 
 def getPriorVersion(version):
     if "." in version:
-        return version.split(".")[0] + str(int(version.split(".")[1])-1)
+        return f'{version.split(".")[0]}.{int(version.split(".")[1]) - 1}'
     else:
         return str(int(version) - 1)
 
@@ -73,7 +73,7 @@ def toAssign(version, primaryVersion, esr):
     else:
         return toAssignMain(version)
 def toAssignMain(version):
-    prior = getPriorVersion(version)
+    prior = getPriorVersion(version).replace(".", "")
     return "https://bugzilla.mozilla.org/buglist.cgi?" + \
     \
     "&f2=cf_status_firefox" + prior + "&o2=nowords&v2=fixed%20verified%20disabled%20unaffected" + \
@@ -88,7 +88,7 @@ def toAssignMain(version):
     "&f14=CP"
 
 def toAssignESR(esrVersion, primaryVersion):
-    esrBaseVersion = str(int(float(esrVersion)))
+    esrBaseVersion = esrVersion.split(".")[0]
     return "https://bugzilla.mozilla.org/buglist.cgi?" + \
     \
     "&f2=cf_tracking_firefox_esr" + esrBaseVersion + "&o2=equals&v2=" + primaryVersion + "%2B" + \
@@ -108,7 +108,7 @@ def toWrite(version, primaryVersion, esr):
     else:
         return toWriteMain(version)
 def toWriteMain(version):
-    prior = getPriorVersion(version)
+    prior = getPriorVersion(version).replace(".", "")
     return "https://bugzilla.mozilla.org/buglist.cgi?" + \
     \
     "&f2=cf_status_firefox" + prior + "&o2=nowords&v2=fixed%20verified%20disabled%20unaffected" + \
@@ -126,7 +126,7 @@ def toWriteMain(version):
     "&f18=CP"
 
 def toWriteESR(esrVersion, primaryVersion):
-    esrBaseVersion = str(int(float(esrVersion)))
+    esrBaseVersion = esrVersion.split(".")[0]
     return "https://bugzilla.mozilla.org/buglist.cgi?" + \
     \
     "&f2=cf_tracking_firefox_esr" + esrBaseVersion + "&o2=equals&v2=" + primaryVersion + "%2B" + \
