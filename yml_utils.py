@@ -6,6 +6,7 @@ import re
 import sys
 import base64
 import requests
+import datetime
 
 from apikey import APIKEY
 
@@ -30,7 +31,7 @@ class Advisory:
     def getCVE(self):
         if self.cve:
             return self.cve
-        return "CVE-FIXME-YYY"
+        return f"MFSA-RESERVE-{datetime.date.today().year}-{self.id}"
     def getTitle(self):
         if ":" in self.title:
             return "'" + self.title + "'"
