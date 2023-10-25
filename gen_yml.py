@@ -83,6 +83,7 @@ if __name__ == "__main__":
                 sorted(rollup_to_main_and_esr1_and_esr2),
                 f"Firefox {mainVersion}, Firefox ESR {allEsrVersions[0]}, Firefox ESR {allEsrVersions[1]}, Thunderbird {allEsrVersions[0]}, and Thunderbird {allEsrVersions[1]}",
                 f"Firefox {getPriorVersion(mainVersion)}, Firefox ESR {getPriorVersion(allEsrVersions[0])}, Firefox ESR {getPriorVersion(allEsrVersions[1])}, Thunderbird {getPriorVersion(allEsrVersions[0])}, and Thunderbird {getPriorVersion(allEsrVersions[1])}",
+                1,
             )
         )
 
@@ -95,6 +96,7 @@ if __name__ == "__main__":
                     sorted(rollup_to_main_and_esr1 - rollup_to_esr2),
                     f"Firefox {mainVersion}, Firefox ESR {allEsrVersions[0]}, and Thunderbird {allEsrVersions[0]}",
                     f"Firefox {getPriorVersion(mainVersion)}, Firefox ESR {getPriorVersion(allEsrVersions[0])}, and Thunderbird {getPriorVersion(allEsrVersions[0])}",
+                    2,
                 )
             )
 
@@ -107,6 +109,7 @@ if __name__ == "__main__":
                     sorted(rollup_to_main_and_esr2 - rollup_to_esr1),
                     f"Firefox {mainVersion}, Firefox ESR {allEsrVersions[1]}, and Thunderbird {allEsrVersions[1]}",
                     f"Firefox {getPriorVersion(mainVersion)}, Firefox ESR {getPriorVersion(allEsrVersions[1])}, and Thunderbird {getPriorVersion(allEsrVersions[1])}",
+                    3,
                 )
             )
 
@@ -119,6 +122,7 @@ if __name__ == "__main__":
                     sorted(rollup_to_main - rollup_to_esr1 - rollup_to_esr2),
                     f"Firefox {mainVersion}",
                     f"Firefox {getPriorVersion(mainVersion)}",
+                    4,
                 )
             )
 
@@ -131,6 +135,7 @@ if __name__ == "__main__":
                     sorted(rollup_to_esr1_and_esr2 - rollup_to_main),
                     f"Firefox ESR {allEsrVersions[0]}, Firefox ESR {allEsrVersions[1]}, Thunderbird {allEsrVersions[0]}, and Thunderbird {allEsrVersions[1]}",
                     f"Firefox ESR {getPriorVersion(allEsrVersions[0])}, Firefox ESR {getPriorVersion(allEsrVersions[1])}, Thunderbird {getPriorVersion(allEsrVersions[0])}, and Thunderbird {getPriorVersion(allEsrVersions[1])}",
+                    5,
                 )
             )
 
@@ -143,6 +148,7 @@ if __name__ == "__main__":
                     sorted(rollup_to_esr1 - rollup_to_esr2 - rollup_to_main),
                     f"Firefox ESR {allEsrVersions[0]} and Thunderbird {allEsrVersions[0]}",
                     f"Firefox ESR {getPriorVersion(allEsrVersions[0])}, and Thunderbird {getPriorVersion(allEsrVersions[0])}",
+                    6,
                 )
             )
 
@@ -155,6 +161,7 @@ if __name__ == "__main__":
                     sorted(rollup_to_esr2 - rollup_to_esr1 - rollup_to_main),
                     f"Firefox ESR {allEsrVersions[1]} and Thunderbird {allEsrVersions[1]}",
                     f"Firefox ESR {getPriorVersion(allEsrVersions[1])}, and Thunderbird {getPriorVersion(allEsrVersions[1])}",
+                    7,
                 )
             )
 
@@ -178,7 +185,7 @@ if __name__ == "__main__":
         eprint("Ensure that the reporter for %s is the same as %s - if not, add the reporter of %s in the yml manually. bmo %s,%s" % (r[1], target_adv.id, r[1], target_adv.id, r[1]))
 
     filteredRollupCalls = []
-    for rollupBugs, versions, priorVersions in rollupCalls:
+    for rollupBugs, versions, priorVersions, rollupType in rollupCalls:
         if len(rollupBugs) == 1:
             b = rollupBugs[0]
             if args.exclude is None or str(b) not in args.exclude:
@@ -188,9 +195,9 @@ if __name__ == "__main__":
                     if not args.allow_single:
                         raise Exception(f"Could not find an advisory for {b} which is the only bug in rollup for {versions}.")
                     else:
-                        filteredRollupCalls.append((rollupBugs, versions, priorVersions))
+                        filteredRollupCalls.append((rollupBugs, versions, priorVersions, rollupType))
         else:
-            filteredRollupCalls.append((rollupBugs, versions, priorVersions))
+            filteredRollupCalls.append((rollupBugs, versions, priorVersions, rollupType))
 
     maxSeverity = "low"
     for a in advisories:
@@ -218,7 +225,7 @@ if __name__ == "__main__":
         for each_id in a.ids:
             print("      - url:", each_id)
 
-    def doRollups(buglist, versionTitle, priorVersionTitle):
+    def doRollups(buglist, versionTitle, priorVersionTitle, rollupType):
         if len(buglist) == 0:
             return
 
@@ -252,7 +259,7 @@ if __name__ == "__main__":
             rollupReporters.add("the Mozilla Fuzzing Team")
 
         description = f"Memory safety {bug_str} present in {priorVersionTitle}. {some_str.capitalize()} {bug_str} showed evidence of memory corruption and we presume that with enough effort {some_str} could have been exploited to run arbitrary code."
-        print("  CVE-XXX-rollup:")
+        print(f"  MFSA-RESERVE-{thisyear}-{rollupType}:")
         print("    title: Memory safety", bug_str, "fixed in", versionTitle)
         print("    impact:", rollupMaxSeverity)
         print("    reporter:", ", ".join(rollupReporters))
@@ -263,5 +270,5 @@ if __name__ == "__main__":
         print("        desc: Memory safety", bug_str, "fixed in", versionTitle)
 
     # Output all Rollup Bugs
-    for rollupBugs, versions, priorVersions in filteredRollupCalls:
-        doRollups(rollupBugs, versions, priorVersions)
+    for rollupBugs, versions, priorVersions, rollupType in filteredRollupCalls:
+        doRollups(rollupBugs, versions, priorVersions, rollupType)
