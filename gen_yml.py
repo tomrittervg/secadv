@@ -10,11 +10,6 @@ import requests
 import argparse
 import itertools
 
-try:
-    from apikey import APIKEY
-except:
-    APIKEY = None
-
 from gen_queries import getPriorVersion, versionToESRs, nonRollupList, rollupListMainAndESR, rollupListMainOnly, rollupListMain, rollupListESROnly, rollupListESR
 from yml_utils import *
 
@@ -27,7 +22,7 @@ if __name__ == "__main__":
     parser.add_argument('version', help='Version to generate queries for. Do not give an ESR version; give the normal version and specify --esr')
     args = parser.parse_args(sys.argv[1:])
     if not APIKEY:
-        eprint("API Key not defined in apikey.py")
+        eprint("API Key not defined in apikey.py or via the BUGZILLA_API_KEY environment variable")
         eprint("Fill that in with an API Key able to access security bugs.")
         sys.exit(1)
     if float(args.version) != int(float(args.version)) and not args.esr:
