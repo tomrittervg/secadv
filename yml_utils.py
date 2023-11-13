@@ -7,8 +7,12 @@ import sys
 import base64
 import requests
 import datetime
+import os
 
-from apikey import APIKEY
+try:
+    from apikey import APIKEY
+except:
+    APIKEY = os.environ.get("BUGZILLA_API_KEY")
 
 class Advisory:
     def __init__(self, bugJSON, advisoryText):

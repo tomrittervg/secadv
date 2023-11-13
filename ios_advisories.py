@@ -9,11 +9,6 @@ import datetime
 import requests
 import argparse
 
-try:
-    from apikey import APIKEY
-except:
-    APIKEY = None
-
 from yml_utils import *
 
 def getBugs(version):
