@@ -95,7 +95,10 @@ def doBugRequest(link):
 def getAdvisoryAttachment(bugid):
     link = "https://bugzilla.mozilla.org/rest/bug/" + str(bugid) + "/attachment?api_key=" + APIKEY
     r = requests.get(link)
-    attachments = r.json()['bugs'][str(bugid)]
+    try:
+        attachments = r.json()['bugs'][str(bugid)]
+    except:
+        raise Exception("Couldn't parse " + str(bugid) + "'s response for a list of attachments.  Response:\n\n" + str(r.text))
     advisory = None
     for a in attachments:
         if a['description'] == "advisory.txt" and not a['is_obsolete']:

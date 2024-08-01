@@ -136,7 +136,7 @@ if __name__ == "__main__":
 
     # rollup-to-esr1
     if (rollup_to_esr1 - rollup_to_esr2 - rollup_to_main):
-        eprint("Bugs that are only in %s and not in %s or %s: %s" % (allEsrVersions[0], allEsrVersions[1], mainVersion, rollup_to_esr1 - rollup_to_esr2 - rollup_to_main))
+        eprint("Bugs that are only in %s and not in %s or %s: %s" % (allEsrVersions[0], allEsrVersions[1] if len(allEsrVersions) > 1 else "<>", mainVersion, rollup_to_esr1 - rollup_to_esr2 - rollup_to_main))
         if args.esr == 1:
             rollupCalls.append(
                 (
