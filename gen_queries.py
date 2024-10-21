@@ -22,6 +22,8 @@ def versionToESRs(version):
         # We have a three-release overlap post-78 due to shortened release cycles
         if x >= 78:
             twoESRVersions.append(x+2)
+    for x in range(131, 137):
+        twoESRVersions.append(x)
 
     twoESRs = True if version in twoESRVersions else False
     subsetOfESRs = [x for x in knownESRs if x <= version]
@@ -56,7 +58,10 @@ def sanityCheck():
         (79, ["68.11", "78.1"]),
         (80, ["68.12", "78.2"]),
         (81, ["78.3"]),
-        (129, ["115.14", "128.1"])
+        (129, ["115.14", "128.1"]),
+        (132, ["115.17", "128.4"]),
+        (136, ["115.21", "128.8"]),
+        (137, ["128.9"])
     ]
     for e in expected:
         if versionToESRs(e[0]) != e[1]:
