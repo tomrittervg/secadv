@@ -76,8 +76,8 @@ if __name__ == "__main__":
         rollupCalls.append(
             (
                 sorted(rollup_to_main_and_esr1_and_esr2),
-                f"Firefox {mainVersion}, Firefox ESR {allEsrVersions[0]}, Firefox ESR {allEsrVersions[1]}, Thunderbird {allEsrVersions[0]}, and Thunderbird {allEsrVersions[1]}",
-                f"Firefox {getPriorVersion(mainVersion)}, Firefox ESR {getPriorVersion(allEsrVersions[0])}, Firefox ESR {getPriorVersion(allEsrVersions[1])}, Thunderbird {getPriorVersion(allEsrVersions[0])}, and Thunderbird {getPriorVersion(allEsrVersions[1])}",
+                f"Firefox {mainVersion}, Thunderbird {mainVersion}, Firefox ESR {allEsrVersions[0]}, Firefox ESR {allEsrVersions[1]}, Thunderbird {allEsrVersions[0]}, and Thunderbird {allEsrVersions[1]}",
+                f"Firefox {getPriorVersion(mainVersion)}, Thunderbird {getPriorVersion(mainVersion)}, Firefox ESR {getPriorVersion(allEsrVersions[0])}, Firefox ESR {getPriorVersion(allEsrVersions[1])}, Thunderbird {getPriorVersion(allEsrVersions[0])}, and Thunderbird {getPriorVersion(allEsrVersions[1])}",
                 1,
             )
         )
@@ -89,8 +89,8 @@ if __name__ == "__main__":
             rollupCalls.append(
                 (
                     sorted(rollup_to_main_and_esr1 - rollup_to_esr2),
-                    f"Firefox {mainVersion}, Firefox ESR {allEsrVersions[0]}, and Thunderbird {allEsrVersions[0]}",
-                    f"Firefox {getPriorVersion(mainVersion)}, Firefox ESR {getPriorVersion(allEsrVersions[0])}, and Thunderbird {getPriorVersion(allEsrVersions[0])}",
+                    f"Firefox {mainVersion}, Thunderbird {mainVersion}, Firefox ESR {allEsrVersions[0]}, and Thunderbird {allEsrVersions[0]}",
+                    f"Firefox {getPriorVersion(mainVersion)}, Thunderbird {getPriorVersion(mainVersion)}, Firefox ESR {getPriorVersion(allEsrVersions[0])}, and Thunderbird {getPriorVersion(allEsrVersions[0])}",
                     2,
                 )
             )
@@ -102,8 +102,8 @@ if __name__ == "__main__":
             rollupCalls.append(
                 (
                     sorted(rollup_to_main_and_esr2 - rollup_to_esr1),
-                    f"Firefox {mainVersion}, Firefox ESR {allEsrVersions[1]}, and Thunderbird {allEsrVersions[1]}",
-                    f"Firefox {getPriorVersion(mainVersion)}, Firefox ESR {getPriorVersion(allEsrVersions[1])}, and Thunderbird {getPriorVersion(allEsrVersions[1])}",
+                    f"Firefox {mainVersion}, Thunderbird {mainVersion}, Firefox ESR {allEsrVersions[1]}, and Thunderbird {allEsrVersions[1]}",
+                    f"Firefox {getPriorVersion(mainVersion)}, Thunderbird {getPriorVersion(mainVersion)}, Firefox ESR {getPriorVersion(allEsrVersions[1])}, and Thunderbird {getPriorVersion(allEsrVersions[1])}",
                     3,
                 )
             )
@@ -115,8 +115,8 @@ if __name__ == "__main__":
             rollupCalls.append(
                 (
                     sorted(rollup_to_main - rollup_to_esr1 - rollup_to_esr2),
-                    f"Firefox {mainVersion}",
-                    f"Firefox {getPriorVersion(mainVersion)}",
+                    f"Firefox {mainVersion} and Thunderbird {mainVersion}",
+                    f"Firefox {getPriorVersion(mainVersion)} and Thunderbird {getPriorVersion(mainVersion)}",
                     4,
                 )
             )
